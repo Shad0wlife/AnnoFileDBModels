@@ -4,12 +4,17 @@
     {
         public SessionSoundManager()
         {
+
+        }
+
+        public SessionSoundManager(bool createDefault)
+        {
             AmbientMoodSoundHandler = new AmbientMoodSoundHandler();
             EnvironmentHandler = new Empty();
         }
 
-        public AmbientMoodSoundHandler AmbientMoodSoundHandler { get; set; }
-        public Empty EnvironmentHandler { get; set; }
+        public AmbientMoodSoundHandler? AmbientMoodSoundHandler { get; set; }
+        public Empty? EnvironmentHandler { get; set; }
     }
 
     public class AmbientMoodSoundHandler
@@ -62,8 +67,8 @@
             val = new List<DatasetCountGrid_Item>(sizeX * sizeY);
         }
 
-        public int x { get; set; }
-        public int y { get; set; }
+        public int? x { get; set; }
+        public int? y { get; set; }
 
         public List<DatasetCountGrid_Item>? val { get; set; }
     }

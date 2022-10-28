@@ -4,9 +4,14 @@
     {
         public AIConstructionManager()
         {
+
+        }
+
+        public AIConstructionManager(bool createDefault)
+        {
             PlannedSettlements = new Empty();
         }
 
-        public Empty PlannedSettlements { get; set; }
+        public Empty? PlannedSettlements { get; set; }
     }
 }

@@ -6,7 +6,17 @@ namespace SerializeGamedata_ManualTest
 {
     public class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
+        {
+            RunOnGameFiles gameFileTester = new RunOnGameFiles();
+
+            await gameFileTester.RunOnAnnoGameFiles();
+
+            Console.WriteLine("Press Enter to exit.");
+            Console.ReadLine();
+        }
+
+        private static void RunOnIncludedTestData()
         {
             string workingDirectory = Environment.CurrentDirectory;
             string projectDirectory = Directory.GetParent(workingDirectory).Parent.Parent.FullName;
@@ -22,11 +32,20 @@ namespace SerializeGamedata_ManualTest
             string communityIslandPath = Path.Combine(projectDirectory, @"TestData\Island\community_island_a7m_gamedata.data");
             string scenario03StoryIsland01 = Path.Combine(projectDirectory, @"TestData\Island\scenario03_storyisland_01_gamedata.data");
 
+            List<string> allTestFiles = new List<string>()
+            {
+                newSnowflakePath,
+                oldMapPath,
+                nwPoolMap,
+                scenario03Map,
+                enbesaMap,
+                arcticMap,
+                communityIslandPath,
+                scenario03StoryIsland01
+            };
 
-            DeserializeTest(arcticMap);
-
-            Console.WriteLine("Press Enter to exit.");
-            Console.ReadLine();
+            foreach(string testPath in allTestFiles)
+                DeserializeTest(testPath);
         }
 
         private static void DeserializeTest(string path)

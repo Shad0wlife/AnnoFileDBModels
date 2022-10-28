@@ -1,6 +1,6 @@
 ﻿namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared.Grids
 {
-    public class VarMapDataGrid : SparseGridBaseIntIndex<blockVarMapData, dataContainer>
+    public class VarMapDataGrid : SparseGridBase<blockVarMapData, dataContainer>
     {
         public VarMapDataGrid()
         {

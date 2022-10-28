@@ -4,9 +4,14 @@
     {
         public WorkforceTransferManager()
         {
+
+        }
+
+        public WorkforceTransferManager(bool createDefault)
+        {
             ParticipantData = new Empty();
         }
 
-        public Empty ParticipantData { get; set; }
+        public Empty? ParticipantData { get; set; }
     }
 }

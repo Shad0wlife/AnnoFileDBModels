@@ -2,7 +2,7 @@
 
 namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared.Grids
 {
-    public class ShortGrid : SparseGridBaseIntIndex<blockShort, short>
+    public class ShortGrid : SparseGridBase<blockShort, short>
     {
         public ShortGrid()
         {

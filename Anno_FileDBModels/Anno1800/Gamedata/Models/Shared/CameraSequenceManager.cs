@@ -17,7 +17,7 @@ namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared
 
         public UTF8String? Name { get; set; }
         public int? SequenceID { get; set; }
-        public int? FarClipLane { get; set; }
+        public int? FarClipPlane { get; set; }
         public int? Length { get; set; }
         public List<int>? CamerasAtTime { get; set; }
         public int? CamCount { get; set; }
@@ -47,6 +47,12 @@ namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared
         public byte[]? BreakableFirstLastTangents { get; set; }
         public byte[]? SameWeightFirstLastTangents { get; set; }
         public List<bool>? KeyframeTypeVisibility { get; set; }
+
+        //SPECIAL for scenario_02_colony_01
+        public int? ConstraintCount { get; set; }
+
+        [FlatArray]
+        public List<CamSequenceConstraint>? SequenceConstraint { get; set; }
     }
 
     public class Keyframe
@@ -57,6 +63,23 @@ namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared
         public float[]? TangentOut { get; set; }
         public byte? Interpolation { get; set; }
         public byte? ManualTangentMode { get; set; }
+    }
+
+    public class CamSequenceConstraint
+    {
+        public ConstraintItem? Constraint { get; set; }
+    }
+
+    public class ConstraintItem
+    {
+        public int? Target { get; set; }
+        public int? Begin { get; set; }
+        public int? Length { get; set; }
+        public List<List<Keyframe>>? AllKeyframes { get; set; }
+        public byte[]? BreakableFirstLastTangents { get; set; }
+        public byte[]? SameWeightFirstLastTangents { get; set; }
+        public List<bool>? KeyframeTypeVisibility { get; set; }
+        public int? ID { get; set; }
     }
 
     public class CameraSequenceAsset
@@ -98,8 +121,10 @@ namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared
         public int? TimeTick { get; set; }
 
         //SPECIAL - Not Like Cam (unlike asset and audio and rest of this)
-        public UnicodeString? ScriptPath { get; set; } //Might profit from polymorph? If this is set, all following except ExecuteOnScriptCancel are not.
-        public bool? ExecuteOnScriptCancel { get; set; } //Might profit from polymorph? If this is set, all following are not.
+        public UTF8String? ScriptContent { get; set; }//Might profit from polymorph? If this is set, all following ExecuteOnScriptCancel are not.
+        public UnicodeString? ScriptPath { get; set; } //Might profit from polymorph? If this is set, all following ExecuteOnScriptCancel are not.
+        public bool? ExecuteOnScriptCancel { get; set; } //Might profit from polymorph? If this is set, all following ExecuteOnScriptCancel are not.
+
         public int? Begin { get; set; }
         public int? Length { get; set; }
         public List<List<Keyframe>>? AllKeyframes { get; set; }

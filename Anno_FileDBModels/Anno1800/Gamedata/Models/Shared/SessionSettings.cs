@@ -41,6 +41,8 @@ namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared
         }
 
         public UnicodeString? GlobalAmbientName { get; set; }
+        public UnicodeString? NorthAmbientName { get; set; }
+        public UnicodeString? SouthAmbientName { get; set; }
 
         public int? TimeOfDay { get; set; }
 

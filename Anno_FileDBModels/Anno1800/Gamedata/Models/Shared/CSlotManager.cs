@@ -2,6 +2,6 @@
 {
     public class CSlotManager
     {
-        public Empty? SnapPartner { get; set; }
+        public List<long>? SnapPartner { get; set; }
     }
 }

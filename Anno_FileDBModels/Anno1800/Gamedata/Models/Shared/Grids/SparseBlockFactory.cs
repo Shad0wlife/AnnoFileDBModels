@@ -85,28 +85,6 @@
         }
     }
 
-    public class SparseBlockFactoryMixedPrimitive<BLOCK, ITEM> : SparseBlockFactory<BLOCK, ITEM> where BLOCK : blockBaseMixedPrimitive<ITEM>, new() where ITEM : struct
-    {
-        public override BLOCK MakeStart()
-        {
-            BLOCK block = MakeStartInternal(DEFAULT_BLOCK_SIZE);
-            block.@default = new List<Empty>() { new Empty() };
-            return block;
-        }
-
-        public override BLOCK MakeStart(short tileSize)
-        {
-            BLOCK block = MakeStartInternal(tileSize);
-            block.@default = new List<Empty>() { new Empty() };
-            return block;
-        }
-
-        public override BLOCK MakeDefault(short xCoord, short yCoord, ITEM defaultVal)
-        {
-            throw new NotImplementedException("Original behaviour not yet known. Sorry.");
-        }
-    }
-
     public abstract class blockBase<T>
     {
         public byte? mode { get; set; }
@@ -124,12 +102,6 @@
     public abstract class blockBasePrimitive<T> : blockBase<T> where T : struct
     {
         public T[]? @default { get; set; }
-        public T[]? values { get; set; }
-    }
-
-    public abstract class blockBaseMixedPrimitive<T> : blockBase<T> where T : struct
-    {
-        public List<Empty>? @default { get; set; }
         public T[]? values { get; set; }
     }
 }

@@ -6,10 +6,15 @@ namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared
     {
         public GameObjectManager()
         {
+
+        }
+
+        public GameObjectManager(bool createDefault)
+        {
             GameObjectLabelMap = new List<Tuple<UTF8String, long>>();
         }
 
-        public List<Tuple<UTF8String, long>> GameObjectLabelMap { get; set; }
+        public List<Tuple<UTF8String, long>>? GameObjectLabelMap { get; set; }
 
         public DynamicObjectGroupCollection? DynamicObjectGroupCollection { get; set; }
     }

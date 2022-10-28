@@ -11,10 +11,11 @@ namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared
 
         public IrrigationManager(int mapSize)
         {
-            m_StaticTileGrid = new ByteGridShortIndex(mapSize, true);
+            m_StaticTileGrid = new ByteGrid(mapSize, true);
         }
 
-        public ByteGridShortIndex? m_StaticTileGrid { get; set; }
+        public ByteGrid? m_StaticTileGrid { get; set; }
+        public bool? IsInitialized { get; set; }
 
     }
 }

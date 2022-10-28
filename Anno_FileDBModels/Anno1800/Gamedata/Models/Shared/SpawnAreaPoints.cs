@@ -27,8 +27,7 @@
     {
         public SpawnAreaPoint()
         {
-            m_AreaPointGrid = new List<Tuple<int, int[]>>();
-            m_AreaRect = new List<Tuple<int, int[]>>();
+
         }
 
         public SpawnAreaPoint(int mapSize)
@@ -39,9 +38,9 @@
             m_AreaRect = new List<Tuple<int, int[]>>();
         }
 
-        public int m_XSize { get; set; }
-        public int m_YSize { get; set; }
-        public List<Tuple<int, int[]>> m_AreaPointGrid { get; set; }
-        public List<Tuple<int, int[]>> m_AreaRect { get; set; }
+        public int? m_XSize { get; set; }
+        public int? m_YSize { get; set; }
+        public List<Tuple<int, int[]>>? m_AreaPointGrid { get; set; }
+        public List<Tuple<int, int[]>>? m_AreaRect { get; set; }
     }
 }

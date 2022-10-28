@@ -4,21 +4,31 @@
     {
         public SelectionManager()
         {
-            SelectionGroupController = new SelectionGroupController();
+
         }
 
-        public SelectionGroupController SelectionGroupController { get; set; }
+        public SelectionManager(bool createDefault)
+        {
+            SelectionGroupController = new SelectionGroupController(createDefault);
+        }
+
+
+        public SelectionGroupController? SelectionGroupController { get; set; }
     }
 
     public class SelectionGroupController
     {
         public SelectionGroupController()
         {
-            StoredSelections = new List<StoredSelection>();
+
         }
 
+        public SelectionGroupController(bool createDefault)
+        {
+            StoredSelections = new List<Tuple<StoredSelection, Empty>>();
+        }
 
-        public List<StoredSelection> StoredSelections { get; set; }
+        public List<Tuple<StoredSelection, Empty>>? StoredSelections { get; set; }
     }
 
     public class StoredSelection
