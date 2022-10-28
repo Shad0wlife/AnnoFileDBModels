@@ -5,7 +5,7 @@ This can be used if you want to deserialize or serialize a supported file type.
 
 Currently, the Library only offers support for gamedata Files (so map data from an a7t file or island data from an a7m file). 
 
-**THESE FILES HAVE NOT BEEN EXHAUSTIVELY TESTED YET!**
+**AS OF GAME VERSION 15.1 ALL THE GAMEDATA FILES OF THE GAME MAPS AND ISLANDS HAVE BEEN VERIFIED WORKING!**
 
 In the future more file types will be supported.
 
