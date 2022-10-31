@@ -1,5 +1,8 @@
-﻿namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared.Grids
+﻿using FileDBSerializer.ObjectSerializer;
+
+namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared.Grids
 {
+    [PropertyLocation(PropertyLocationOption.AFTER_PARENT)]
     public class ByteGrid : SparseGridBase<blockByte, byte>
     {
         public ByteGrid()

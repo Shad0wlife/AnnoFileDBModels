@@ -34,20 +34,7 @@ namespace SerializeGamedata_ManualTest
 
             Console.WriteLine("Found game files at: " + gamePath);
 
-            string selfFolderPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)!;
-            string outPath = Path.Combine(selfFolderPath, "output");
-
-            if (Directory.Exists(outPath))
-            {
-                Console.WriteLine("Deleting previous output.");
-                Directory.Delete(outPath, true);
-            }
-            else
-            {
-                Console.WriteLine("No previous output.");
-            }
-
-            DirectoryInfo outDir = Directory.CreateDirectory(outPath);
+            string outPath = Program.CreateCleanLocalOutputDir();
             string errorFilePath = Path.Combine(outPath, "_fileErrors.txt");
 
             Console.WriteLine("Opening game files.");

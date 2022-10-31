@@ -1,4 +1,6 @@
-﻿namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared.Grids
+﻿using FileDBSerializer.ObjectSerializer;
+
+namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared.Grids
 {
     public abstract class SparseBlockFactory<BLOCK, ITEM> where BLOCK : blockBase<ITEM>, new()
     {
@@ -93,12 +95,14 @@
         public short? y { get; set; }
     }
 
+    [PropertyLocation(PropertyLocationOption.AFTER_PARENT)]
     public abstract class blockBaseReference<T> : blockBase<T> where T : new()
     {
         public List<T>? @default { get; set; }
         public List<T>? values { get; set; }
     }
 
+    [PropertyLocation(PropertyLocationOption.AFTER_PARENT)]
     public abstract class blockBasePrimitive<T> : blockBase<T> where T : struct
     {
         public T[]? @default { get; set; }

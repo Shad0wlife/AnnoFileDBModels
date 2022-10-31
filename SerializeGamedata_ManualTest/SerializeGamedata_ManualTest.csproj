@@ -12,6 +12,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="FileDBReader">
+      <HintPath>lib\FileDBReader.dll</HintPath>
+    </Reference>
     <Reference Include="FileDBSerializer">
       <HintPath>..\Anno_FileDBModels\lib\FileDBSerializer.dll</HintPath>
     </Reference>
@@ -27,6 +30,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="6.0.0" />
     <PackageReference Include="SharpZipLib" Version="1.4.0" />
+    <PackageReference Include="XMLDiffPatch" Version="1.0.8.28" />
   </ItemGroup>
 
 </Project>
