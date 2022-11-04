@@ -120,7 +120,7 @@ namespace SerializeGamedata_ManualTest
 
         private RDAReader[]? readers;
 
-        private Dictionary<string, (RDAFile, (string, Mutex))> allFiles { get; } = new();
+        private Dictionary<string, (RDAFile, (string, object))> allFiles { get; } = new();
 
         public IEnumerable<string> Files => allFiles.Keys;
 
@@ -151,12 +151,12 @@ namespace SerializeGamedata_ManualTest
                         {
                             FileName = x
                         };
-                        //Add a Mutex per RDAReader to avoid reading at the same time and creating invalid a7t/a7m reads.
-                        var readerMutex = new Mutex();
+                        //Add a Lock per RDAReader to avoid reading at the same time and creating invalid a7t/a7m reads.
+                        object readerLock = new object();
                         reader.ReadRDAFile();
                         foreach (var file in reader.rdaFolder.GetAllFiles())
                             if (file.FileName.EndsWith(".a7m") || file.FileName.EndsWith(".a7t"))
-                                allFiles[file.FileName] = (file, (System.IO.Path.GetFileNameWithoutExtension(x), readerMutex));
+                                allFiles[file.FileName] = (file, (System.IO.Path.GetFileNameWithoutExtension(x), readerLock));
                         return reader;
                     }
                     catch (Exception e)
@@ -189,7 +189,7 @@ namespace SerializeGamedata_ManualTest
             }
             Stream? stream = null;
 
-            if (!allFiles.TryGetValue(filePath.Replace('\\', '/'), out (RDAFile rdaFile, (string mutexName, Mutex readerMutex) mutexPack) file) || file.rdaFile is null || file.mutexPack.readerMutex is null)
+            if (!allFiles.TryGetValue(filePath.Replace('\\', '/'), out (RDAFile rdaFile, (string lockName, object readerLock) mutexPack) file) || file.rdaFile is null || file.mutexPack.readerLock is null)
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine($"not found in archive: {filePath}");
@@ -197,23 +197,24 @@ namespace SerializeGamedata_ManualTest
                 return null;
             }
 
-            try
+
+            lock (file.mutexPack.readerLock)
             {
-                file.mutexPack.readerMutex.WaitOne();
-                Console.WriteLine($"Acquired Mutex for {file.mutexPack.mutexName}");
-                stream = new MemoryStream(file.rdaFile.GetData());
+                try
+                {
+                    Console.WriteLine($"Acquired Lock for {file.mutexPack.lockName}");
+                    stream = new MemoryStream(file.rdaFile.GetData());
+                }
+                catch (Exception e)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"error reading archive: {filePath}", e);
+                    Console.ResetColor();
+                }
             }
-            catch (Exception e)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"error reading archive: {filePath}", e);
-                Console.ResetColor();
-            }
-            finally
-            {
-                file.mutexPack.readerMutex.ReleaseMutex();
-                Console.WriteLine($"Released Mutex for {file.mutexPack.mutexName}");
-            }
+
+            Console.WriteLine($"Released Lock for {file.mutexPack.lockName}");
+
             return stream;
         }
 
