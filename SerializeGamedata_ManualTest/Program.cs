@@ -1,5 +1,7 @@
 ﻿using Anno_FileDBModels.Anno1800.Gamedata.Models.Shared;
 using FileDBReader;
+using FileDBReader.src;
+using InterpreterDoc = FileDBReader.src.Interpreter;
 using FileDBReader.src.XmlRepresentation;
 using FileDBSerializing;
 using FileDBSerializing.ObjectSerializer;
@@ -10,69 +12,60 @@ namespace SerializeGamedata_ManualTest
 {
     public class Program
     {
+        public const string NestedInterpreterSubPath = @"TestData\NestedInterpreter.xml";
+
+        public static string NestedInterpreterPath 
+        { 
+            get
+            {
+                return Path.Combine(ExecutionFolder, NestedInterpreterSubPath);
+            } 
+        }
+
+        public static string ExecutionFolder
+        {
+            get
+            {
+                return Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)!;
+            }
+        }
+
+        private static InterpreterDoc _nestedInterpreter = null;
+        public static InterpreterDoc NestedInterpreter
+        {
+            get
+            {
+                if(_nestedInterpreter == null)
+                {
+                    if (!File.Exists(NestedInterpreterPath))
+                    {
+                        throw new FileNotFoundException($"Could not find Interpreter document for nested data. Default path would be: \r\n{NestedInterpreterPath}");
+                    }
+
+                    using (FileStream interpreterDocStream = new FileStream(NestedInterpreterPath, FileMode.Open, FileAccess.Read))
+                    {
+                        _nestedInterpreter = new InterpreterDoc(InterpreterDoc.ToInterpreterDoc(interpreterDocStream));
+                    }
+                }
+                return _nestedInterpreter;
+            }
+        }
+
         static async Task Main(string[] args)
         {
-            RunOnGameFiles gameFileTester = new RunOnGameFiles();
+            Console.WriteLine($"Interpreter Doc Path is \"{NestedInterpreterPath}\"");
 
-            //await gameFileTester.RunOnAnnoGameFiles();
-            RunOnIncludedTestData();
+            RunOnGameFiles gameFileTester = new RunOnGameFiles();
+            RunOnIncludedTestdata includedDataTester = new RunOnIncludedTestdata();
+
+            await gameFileTester.RunOnAnnoGameFiles();
+            //includedDataTester.RunOnIncludedTestData();
 
             Console.WriteLine("Press Enter to exit.");
             Console.ReadLine();
         }
 
-        private static void RunOnIncludedTestData()
-        {
-            string workingDirectory = Environment.CurrentDirectory;
-            string projectDirectory = Directory.GetParent(workingDirectory).Parent.Parent.FullName;
-
-            string newSnowflakePath = Path.Combine(projectDirectory, @"TestData\Map\moderate_snowflake_ss_01_gamedata.data");
-            string oldMapPath = Path.Combine(projectDirectory, @"TestData\Map\gamedata_1408_old.data");
-            string nwPoolMap = Path.Combine(projectDirectory, @"TestData\Map\colony01_l_03_gamedata.data");
-            string scenario03Map = Path.Combine(projectDirectory, @"TestData\Map\scenario_03_colony_01_gamedata.data");
-            string enbesaMap = Path.Combine(projectDirectory, @"TestData\Map\colony02_01_gamedata.data");
-            string arcticMap = Path.Combine(projectDirectory, @"TestData\Map\colony_03_sp_gamedata.data");
-
-
-            string communityIslandPath = Path.Combine(projectDirectory, @"TestData\Island\community_island_a7m_gamedata.data");
-            string scenario03StoryIsland01 = Path.Combine(projectDirectory, @"TestData\Island\scenario03_storyisland_01_gamedata.data");
-
-            List<string> allTestFiles = new List<string>()
-            {
-                newSnowflakePath,
-                oldMapPath,
-                nwPoolMap,
-                scenario03Map,
-                enbesaMap,
-                arcticMap,
-                communityIslandPath,
-                scenario03StoryIsland01
-            };
-
-            string outPath = CreateCleanLocalOutputDir();
-
-            foreach (string testPath in allTestFiles)
-            {
-                string fileName = Path.GetFileName(testPath);
-                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(testPath);
-                (bool result, string org, string created) = CompareTest(testPath);
-
-                Console.WriteLine();
-                Console.WriteLine("------------------------------------------------------------");
-                if (result)
-                {
-                    Console.WriteLine($"[SUCCESS] De- and Reserialized File {fileName} matches original.");
-                }
-                else
-                {
-                    Console.WriteLine($"[FAILURE] De- and Reserialized File {fileName} differs from original.");
-                    File.WriteAllText(Path.Combine(outPath, fileNameWithoutExt+"_org.xml"), org);
-                    File.WriteAllText(Path.Combine(outPath, fileNameWithoutExt + "_created.xml"), created);
-                }
-                Console.WriteLine("------------------------------------------------------------");
-                Console.WriteLine();
-            }
-        }
+        
 
         public static string CreateCleanLocalOutputDir()
         {
@@ -94,52 +87,95 @@ namespace SerializeGamedata_ManualTest
             return outPath;
         }
 
-        private static (Gamedata, FileDBDocumentVersion) DeserializeTest(string path)
+        private static (Gamedata, FileDBDocumentVersion) DeserializeTest(IFileDBDocument fileDBDocument)
         {
-            Console.WriteLine($"Trying to parse {path}.");
+            FileDBDocumentVersion Version = fileDBDocument.VERSION;
+            FileDBDocumentDeserializer<Gamedata> deserializer = new FileDBDocumentDeserializer<Gamedata>(new FileDBSerializerOptions() { Version = Version });
+            var deserializedResult = deserializer.GetObjectStructureFromFileDBDocument(fileDBDocument);
 
-            using (FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Read))
+            Console.WriteLine("Finished Deserializing.");
+
+            if (deserializedResult is Gamedata gd)
             {
-                var Version = VersionDetector.GetCompressionVersion(stream);
-
-                FileDBSerializer<Gamedata> deserializer = new FileDBSerializer<Gamedata>(Version);
-                var deserializedResult = deserializer.Deserialize(stream);
-                Console.WriteLine("Finished Deserializing.");
-
-                if(deserializedResult is Gamedata gd)
+                if (gd.GameSessionManager?.AreaManagerData?.Count > 0)
                 {
-                    return (gd, Version);
+                    int idx = 0;
+                    foreach (Tuple<short, AreaManagerDataItem> dataItemTuple in gd.GameSessionManager.AreaManagerData)
+                    {
+                        Console.WriteLine($"Deserializing nested AreaManagerData with id {dataItemTuple.Item1} at position {idx}.");
+                        dataItemTuple.Item2.DecompressData();
+                        Console.WriteLine("Finished Deserialing nested AreaManagerData Item.");
+                        idx++;
+                    }
                 }
-                else
-                {
-                    throw new InvalidCastException("Gamedata FileDBSerializer returned an object that is not Gamedata.");
-                }
+                return (gd, Version);
+            }
+            else
+            {
+                throw new InvalidCastException("Gamedata FileDBSerializer returned an object that is not Gamedata.");
             }
         }
 
         private static IFileDBDocument SerializeBack(Gamedata toSerialize, FileDBDocumentVersion toVersion)
         {
+            if(toSerialize.GameSessionManager?.AreaManagerData?.Count > 0)
+            {
+                int idx = 0;
+                foreach (Tuple<short, AreaManagerDataItem> dataItemTuple in toSerialize.GameSessionManager.AreaManagerData)
+                {
+                    Console.WriteLine($"Reserializing nested AreaManagerData with id {dataItemTuple.Item1} at position {idx}.");
+                    dataItemTuple.Item2.CompressData();
+                    Console.WriteLine("Finished Reserialing nested AreaManagerData Item.");
+                    idx++;
+                }
+            }
+
             FileDBDocumentSerializer fileDBDocumentSerializer = new FileDBDocumentSerializer(new FileDBSerializerOptions() { Version = toVersion });
             IFileDBDocument fdbDoc = fileDBDocumentSerializer.WriteObjectStructureToFileDBDocument(toSerialize);
             return fdbDoc;
         }
 
-        private static IFileDBDocument FileToFileDbDoc(string path)
+        public static IFileDBDocument FileToFileDbDoc(string path)
         {
+            Console.WriteLine($"Trying to parse {path}.");
             using (FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Read))
             {
-                var Version = VersionDetector.GetCompressionVersion(stream);
-
-                DocumentParser loader = new DocumentParser(Version);
-                IFileDBDocument fileDBDocument = loader.LoadFileDBDocument(stream);
-                return fileDBDocument;
+                return StreamToFileDbDoc(stream);
             }
         }
 
-        private static string FileDBToString(IFileDBDocument doc)
+        public static IFileDBDocument StreamToFileDbDoc(Stream stream)
         {
-            XmlDocument xmlDoc = new FileDbXmlConverter().ToXml(doc);
-            using(MemoryStream stream = new MemoryStream())
+            var Version = VersionDetector.GetCompressionVersion(stream);
+
+            DocumentParser loader = new DocumentParser(Version);
+            IFileDBDocument fileDBDocument = loader.LoadFileDBDocument(stream);
+            return fileDBDocument;
+        }
+
+        private static XmlDocument InterpretNestedFileDB(XmlDocument toInterpret)
+        {
+            XmlInterpreter interpreter = new XmlInterpreter();
+
+            return interpreter.Interpret(toInterpret, NestedInterpreter);
+        }
+
+        private static string FileDBToString(IFileDBDocument doc, bool interpretNested)
+        {
+            XmlDocument xmlDoc;
+            try
+            {
+                xmlDoc = new FileDbXmlConverter().ToXml(doc);
+
+                if (interpretNested)
+                    xmlDoc = InterpretNestedFileDB(xmlDoc);
+            }
+            catch(Exception ex)
+            {
+                return "";
+            }
+
+            using (MemoryStream stream = new MemoryStream())
             {
                 xmlDoc.Save(stream);
                 stream.Seek(0, SeekOrigin.Begin);
@@ -150,14 +186,30 @@ namespace SerializeGamedata_ManualTest
             }
         }
 
-        private static (bool, string, string) CompareTest(string path)
+        public static (bool, string, string) CompareTest(IFileDBDocument originalDoc)
         {
-            IFileDBDocument originalDoc = FileToFileDbDoc(path);
-            string originalDocString = FileDBToString(originalDoc);
+            string originalDocString = FileDBToString(originalDoc, true);
 
-            (Gamedata gamedata, FileDBDocumentVersion fileVersion) = DeserializeTest(path);
-            IFileDBDocument serialized = SerializeBack(gamedata, fileVersion);
-            string serializedString = FileDBToString(serialized);
+            Gamedata? gamedata = null;
+            FileDBDocumentVersion? fileVersion = null;
+            string serializedString = "<Content>";
+            try
+            {
+                (gamedata, fileVersion) = DeserializeTest(originalDoc);
+
+                if (gamedata != null && fileVersion != null)
+                {
+                    IFileDBDocument serialized = SerializeBack(gamedata, fileVersion.Value);
+                    serializedString = FileDBToString(serialized, true);
+                }
+            }
+            catch(InvalidProgramException ex)
+            {
+                Console.WriteLine("Exception during De- or Reserialization. Comparing to empty.");
+                serializedString += "<ErrorMsg>" + ex.Message + "</ErrorMsg>";
+                serializedString += "</Content>";
+            }
+
 
             using (TextReader orgReader = new StringReader(originalDocString))
             using (TextReader serializedReader = new StringReader(serializedString))

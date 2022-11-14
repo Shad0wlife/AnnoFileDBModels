@@ -14,6 +14,16 @@ namespace SerializeGamedata_ManualTest
 {
     public class RunOnGameFiles
     {
+        /// <summary>
+        /// Test different values for best performance.
+        /// </summary>
+        private const int ParallelismCount = 16;
+        private static readonly Dictionary<string, string> ReplaceOps = new Dictionary<string, string>()
+            {
+                { "Delayed Construction", "DelayedConstruction" },
+                { "Bus Activation", "BusActivation" },
+            };
+
         public static string? GetInstallDirFromRegistry()
         {
             string installDirKey = @"SOFTWARE\WOW6432Node\Ubisoft\Anno 1800";
@@ -24,7 +34,7 @@ namespace SerializeGamedata_ManualTest
         public async Task RunOnAnnoGameFiles()
         {
             Console.WriteLine("Running on anno game Files.");
-            UISettings.EnableConsole = false;
+            UISettings.EnableConsole = false; //Disable RDAExplorer Console Output
 
             string? gamePath = GetInstallDirFromRegistry();
             if (string.IsNullOrEmpty(gamePath))
@@ -42,8 +52,25 @@ namespace SerializeGamedata_ManualTest
             int fileCount = archive.Files.Count();
             Console.WriteLine($"Finished scanning game files, found {fileCount} candidates.");
 
+            //Handle replace ops here, so the interpreter doesn't conflict with itself
+            //by multithreadedly adding and removing the replace ops.
+            RegisterSpaceTagReplaceOps();
+
             IEnumerable<string> messages = RunOnArchiveParallel(archive, outPath, errorFilePath);
             File.WriteAllLines(errorFilePath, messages);
+
+            //Clean up replace ops, just in case the program does not end here at some point in the future :D
+            UnregisterSpaceTagReplaceOps();
+        }
+
+        private static void RegisterSpaceTagReplaceOps()
+        {
+            FileDBReader.src.XmlRepresentation.InvalidTagNameHelper.RegisterReplaceOperations(ReplaceOps);
+        }
+
+        private static void UnregisterSpaceTagReplaceOps()
+        {
+            FileDBReader.src.XmlRepresentation.InvalidTagNameHelper.UnregisterReplaceOperations(ReplaceOps);
         }
 
         private IEnumerable<string> RunOnArchive(IDataArchive archive, string outFolder, string errorLog)
@@ -74,7 +101,7 @@ namespace SerializeGamedata_ManualTest
                             {
                                 try
                                 {
-                                    TestDeserializeGamedata(memStream, file);
+                                    TestDeserializeGamedata(memStream, file, outFolder);
                                 }
                                 catch (Exception ex)
                                 {
@@ -111,11 +138,9 @@ namespace SerializeGamedata_ManualTest
 
             ParallelLoopResult result = Parallel.ForEach(
                 archive.Files, 
-                new ParallelOptions() { MaxDegreeOfParallelism = 16 }, 
+                new ParallelOptions() { MaxDegreeOfParallelism = ParallelismCount }, 
                 file => {
                     step++;
-
-                    //Task.Delay((step % 16) * 100);
 
                     Console.WriteLine($"[{step}/{fileCount}] - Handling a7m file: {file}");
                     string fileName = Path.GetFileNameWithoutExtension(file);
@@ -134,7 +159,7 @@ namespace SerializeGamedata_ManualTest
                                     {
                                         try
                                         {
-                                            TestDeserializeGamedata(memStream, file);
+                                            TestDeserializeGamedata(memStream, file, outFolder);
                                         }
                                         catch (Exception ex)
                                         {
@@ -166,19 +191,29 @@ namespace SerializeGamedata_ManualTest
             return failureMessages;
         }
 
-        private void TestDeserializeGamedata(Stream gamedataStream, string file)
+        private void TestDeserializeGamedata(Stream gamedataStream, string file, string outPath)
         {
             Console.WriteLine($"Trying to parse gamedata.data from \"{file}\".");
+            string debugName = Path.GetFileNameWithoutExtension(file);
 
-            gamedataStream.Seek(0, SeekOrigin.Begin);
+            IFileDBDocument fileDBDocument = Program.StreamToFileDbDoc(gamedataStream);
 
-            var Version = VersionDetector.GetCompressionVersion(gamedataStream);
+            (bool result, string org, string created) = Program.CompareTest(fileDBDocument);
 
-            gamedataStream.Seek(0, SeekOrigin.Begin);
-
-            FileDBSerializer<Gamedata> deserializer = new FileDBSerializer<Gamedata>(Version);
-            var deserializedResult = deserializer.Deserialize(gamedataStream);
-            Console.WriteLine("Finished Deserializing.");
+            Console.WriteLine();
+            Console.WriteLine("------------------------------------------------------------");
+            if (result)
+            {
+                Console.WriteLine($"[SUCCESS] De- and Reserialized File {debugName} matches original.");
+            }
+            else
+            {
+                Console.WriteLine($"[FAILURE] De- and Reserialized File {debugName} differs from original.");
+                File.WriteAllText(Path.Combine(outPath, debugName + "_org.xml"), org);
+                File.WriteAllText(Path.Combine(outPath, debugName + "_created.xml"), created);
+            }
+            Console.WriteLine("------------------------------------------------------------");
+            Console.WriteLine();
         }
     }
 }
