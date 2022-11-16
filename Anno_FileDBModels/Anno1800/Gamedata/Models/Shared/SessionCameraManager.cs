@@ -1,4 +1,6 @@
-﻿namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared
+﻿using System.Linq;
+
+namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared
 {
     public class SessionCameraManager
     {

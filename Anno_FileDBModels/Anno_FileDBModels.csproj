@@ -1,8 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
@@ -10,6 +10,15 @@
     <Reference Include="FileDBSerializer">
       <HintPath>lib\FileDBSerializer.dll</HintPath>
     </Reference>
+  </ItemGroup>
+    
+  <ItemGroup>
+    <!-- Anno_FileDBModels.Shared for general purpose shared classes like Empty -->
+    <Using Include="Anno_FileDBModels.Shared"/>
+    <!-- For Tuples -->
+    <Using Include="System"/>
+    <!-- For Lists -->
+    <Using Include="System.Collections.Generic"/>
   </ItemGroup>
 
 </Project>

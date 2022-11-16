@@ -1,6 +1,7 @@
 ﻿using Anno_FileDBModels.Anno1800.Gamedata.Models.Shared.AreaManagerData;
 using FileDBSerializing;
 using FileDBSerializing.ObjectSerializer;
+using System.IO;
 
 namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared
 {
