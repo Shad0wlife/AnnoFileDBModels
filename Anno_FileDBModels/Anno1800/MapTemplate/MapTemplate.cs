@@ -1,4 +1,5 @@
 ﻿using FileDBSerializing.ObjectSerializer;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Anno_FileDBModels.Anno1800.MapTemplate
 {
@@ -20,11 +21,13 @@ namespace Anno_FileDBModels.Anno1800.MapTemplate
 
     public class RandomlyPlacedThirdParty
     {
+        [SuppressMessage("Style", "IDE1006:Naming Styles")]
         public RandomlyPlacedThirdPartyValue? value { get; set; }
     }
 
     public class RandomlyPlacedThirdPartyValue
     {
+        [SuppressMessage("Style", "IDE1006:Naming Styles")]
         public short? id { get; set; }
     }
 }
