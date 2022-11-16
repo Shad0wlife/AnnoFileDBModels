@@ -11,6 +11,13 @@ namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared
         {
             return new List<Tuple<short, AreaManagerDataItem>>() { new Tuple<short, AreaManagerDataItem>(1, new AreaManagerDataItem(areaManagerRaw)) };
         }
+
+        public static List<Tuple<short, AreaManagerDataItem>> MakeDefaultAreaManagerDataMapTupleList()
+        {
+            AreaManagerDataItem defaultItem = new AreaManagerDataItem();
+            defaultItem.CreateDefaultAreaManagerData();
+            return new List<Tuple<short, AreaManagerDataItem>>() { new Tuple<short, AreaManagerDataItem>(1, defaultItem) };
+        }
     }
 
     public class AreaManagerDataItem
@@ -31,6 +38,7 @@ namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared
         public byte[]? Data { get; set; }
 
         private DataContent? DecompressedData;
+        private FileDBDocumentVersion UsedFileDBCompression = FileDBDocumentVersion.Version1;
 
         public DataContent? GetDecompressedData(bool decompress = false)
         {
@@ -42,7 +50,7 @@ namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared
             return DecompressedData;
         }
 
-        public void SetDecompresseddata(DataContent? decompressed, bool compress = false)
+        public void SetDecompressedData(DataContent? decompressed, bool compress = false)
         {
             DecompressedData = decompressed;
 
@@ -58,10 +66,14 @@ namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared
             {
                 using (MemoryStream stream = new MemoryStream(Data))
                 {
-                    //Nested AreaManagerData is always Version 1
-                    FileDBDocumentVersion Version = FileDBDocumentVersion.Version1;
 
-                    FileDBSerializer<DataContent> deserializer = new FileDBSerializer<DataContent>(Version);
+                    var actualVersion = VersionDetector.GetCompressionVersion(stream);
+
+                    UsedFileDBCompression = actualVersion;
+
+                    stream.Seek(0, SeekOrigin.Begin);
+
+                    FileDBSerializer<DataContent> deserializer = new FileDBSerializer<DataContent>(UsedFileDBCompression);
                     var deserializedResult = deserializer.Deserialize(stream);
                     Console.WriteLine("Finished Deserializing.");
 
@@ -85,9 +97,7 @@ namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared
         {
             if (DecompressedData is not null)
             {
-                //Nested AreaManagerData is always Version 1
-                FileDBDocumentVersion Version = FileDBDocumentVersion.Version1;
-                FileDBDocumentSerializer fileDBDocumentSerializer = new FileDBDocumentSerializer(new FileDBSerializerOptions() { Version = Version });
+                FileDBDocumentSerializer fileDBDocumentSerializer = new FileDBDocumentSerializer(new FileDBSerializerOptions() { Version = UsedFileDBCompression });
                 IFileDBDocument fdbDoc = fileDBDocumentSerializer.WriteObjectStructureToFileDBDocument(DecompressedData);
 
                 DocumentWriter streamWriter = new DocumentWriter();
@@ -95,6 +105,7 @@ namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared
                 {
                     streamWriter.WriteFileDBToStream(fdbDoc, stream);
                     Data = stream.ToArray();
+                    ByteCount = Data.Length;
                 }
             }
             else
@@ -102,6 +113,12 @@ namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared
                 throw new ArgumentNullException("The DecompressedData was null and thus could not be compressed.");
             }
 
+        }
+
+        public void CreateDefaultAreaManagerData()
+        {
+            DataContent dataContent = new DataContent(true);
+            SetDecompressedData(dataContent, true);
         }
 
     }

@@ -2,6 +2,23 @@
 {
     public class AreaObjectManager
     {
+        public AreaObjectManager()
+        {
+
+        }
+
+        public AreaObjectManager(bool createDefault)
+        {
+            GameObjectIDCounter = 0;
+            NonGameObjectIDCounter = 0;
+            QueuedChangeGUID = new Empty();
+            QueuedDeletes = new byte[0];
+            ObjectGroupFilterCollection = new ObjectGroupFilterCollection(createDefault);
+            ObjectGroupCollection = new ObjectGroupCollection(createDefault);
+            GameObject = new GameObjectCollection(createDefault);
+            NaturePreset = new GameObjectCollection(createDefault);
+            EditorObject = new GameObjectCollection(createDefault);
+        }
 
         public long? GameObjectIDCounter { get; set; }
         public long? NonGameObjectIDCounter { get; set; }

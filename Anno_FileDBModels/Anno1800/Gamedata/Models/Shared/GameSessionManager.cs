@@ -9,14 +9,8 @@ namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared
 
         }
 
-        /// <summary>
-        /// GameSessionManager for a Pool Map
-        /// </summary>
-        /// <param name="mapSize"></param>
-        /// <param name="playableSize"></param>
-        /// <param name="ambientName"></param>
-        /// <param name="areaManagerData"></param>
-        public GameSessionManager(int mapSize, int playableSize, string ambientName, byte[] areaManagerData)
+
+        private GameSessionManager(int mapSize, int playableSize, string ambientName)
         {
             SessionSettings = new SessionSettings(ambientName, mapSize, playableSize);
             SessionRandomManager = new Empty();
@@ -55,7 +49,33 @@ namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared
             AreaLinks = new Empty();
             AreaIDs = new ShortGrid(mapSize, false);
             SpawnAreaPoints = SpawnAreaPointsHelper.MakeEmptySpawnAreaPoints(mapSize);
+        }
+
+        /// <summary>
+        /// GameSessionManager for a Pool Map
+        /// </summary>
+        /// <param name="mapSize"></param>
+        /// <param name="playableSize"></param>
+        /// <param name="ambientName"></param>
+        /// <param name="areaManagerData">The raw data byte array that is the data of the first Data item.</param>
+        public GameSessionManager(int mapSize, int playableSize, string ambientName, byte[] areaManagerData) : this(mapSize, playableSize, ambientName)
+        {
             AreaManagerData = AreaManagerDataHelper.MakeAreaManagerDataMapTupleList(areaManagerData);
+        }
+
+        /// <summary>
+        /// GameSessionManager for a Pool Map
+        /// </summary>
+        /// <param name="mapSize"></param>
+        /// <param name="playableSize"></param>
+        /// <param name="ambientName"></param>
+        /// <param name="createAreaManagerData">If a default AreaManagerData content for a pool map should be created. Empty AreaManagerData on false (not null).</param>
+        public GameSessionManager(int mapSize, int playableSize, string ambientName,  bool createAreaManagerData) : this(mapSize, playableSize, ambientName)
+        {
+            if (createAreaManagerData)
+                AreaManagerData = AreaManagerDataHelper.MakeDefaultAreaManagerDataMapTupleList();
+            else
+                AreaManagerData = new List<Tuple<short, AreaManagerDataItem>>();
         }
 
         //TODO GameSessionManager for Pool Island

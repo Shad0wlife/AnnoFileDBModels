@@ -13,6 +13,12 @@
             GameSessionManager = new GameSessionManager(mapSize, playableSize, ambientName, areaManagerData);
         }
 
+        public Gamedata(int mapSize, int playableSize, string ambientName, bool createAreaManagerData)
+        {
+            FileVersion = 8;
+            GameSessionManager = new GameSessionManager(mapSize, playableSize, ambientName, createAreaManagerData);
+        }
+
         public int? FileVersion { get; set; }
         public GameSessionManager? GameSessionManager { get; set; }
     }
