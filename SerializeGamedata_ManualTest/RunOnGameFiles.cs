@@ -14,6 +14,13 @@ namespace SerializeGamedata_ManualTest
 {
     public class RunOnGameFiles
     {
+        public RunOnGameFiles(bool excessiveMode)
+        {
+            ExcessiveMode = excessiveMode;
+        }
+
+        private bool ExcessiveMode { get; }
+
         /// <summary>
         /// Test different values for best performance.
         /// </summary>
@@ -198,19 +205,31 @@ namespace SerializeGamedata_ManualTest
 
             IFileDBDocument fileDBDocument = Program.StreamToFileDbDoc(gamedataStream);
 
-            (bool result, string org, string created) = Program.CompareTest(fileDBDocument);
+            TestResultWithFileContents testResult = Program.CompareTest(fileDBDocument, ExcessiveMode);
 
             Console.WriteLine();
             Console.WriteLine("------------------------------------------------------------");
-            if (result)
+            if (testResult.Success)
             {
                 Console.WriteLine($"[SUCCESS] De- and Reserialized File {debugName} matches original.");
             }
             else
             {
                 Console.WriteLine($"[FAILURE] De- and Reserialized File {debugName} differs from original.");
-                File.WriteAllText(Path.Combine(outPath, debugName + "_org.xml"), org);
-                File.WriteAllText(Path.Combine(outPath, debugName + "_created.xml"), created);
+                string orgFilePath = Path.Combine(outPath, debugName + "_org.xml");
+                File.WriteAllText(orgFilePath, testResult.OriginalContent);
+
+                string createdFilePath = Path.Combine(outPath, debugName + "_created.xml");
+                File.WriteAllText(createdFilePath, testResult.CreatedContent);
+
+                if(ExcessiveMode)
+                {
+                    string orgBinaryFilePath = Path.Combine(outPath, debugName + "_orgBinary.xml");
+                    string createdBinaryFilePath = Path.Combine(outPath, debugName + "_createdBinary.xml");
+
+                    File.WriteAllText(orgBinaryFilePath, testResult.OriginalContentWithBinaryData);
+                    File.WriteAllText(createdBinaryFilePath, testResult.CreatedContentWithBinaryData);
+                }
             }
             Console.WriteLine("------------------------------------------------------------");
             Console.WriteLine();

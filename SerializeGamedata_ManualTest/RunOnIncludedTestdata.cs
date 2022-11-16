@@ -9,6 +9,13 @@ namespace SerializeGamedata_ManualTest
 {
     public class RunOnIncludedTestdata
     {
+        public RunOnIncludedTestdata(bool excessiveMode)
+        {
+            ExcessiveMode = excessiveMode;
+        }
+
+        private bool ExcessiveMode { get; }
+
         public void RunOnIncludedTestData()
         {
             string workingDirectory = Environment.CurrentDirectory;
@@ -43,30 +50,42 @@ namespace SerializeGamedata_ManualTest
             {
                 string fileName = Path.GetFileName(testPath);
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(testPath);
-                (bool result, string org, string created) = CompareTest(testPath);
+                TestResultWithFileContents testResult = CompareTest(testPath, ExcessiveMode);
 
                 Console.WriteLine();
                 Console.WriteLine("------------------------------------------------------------");
-                if (result)
+                if (testResult.Success)
                 {
                     Console.WriteLine($"[SUCCESS] De- and Reserialized File {fileName} matches original.");
                 }
                 else
                 {
                     Console.WriteLine($"[FAILURE] De- and Reserialized File {fileName} differs from original.");
-                    File.WriteAllText(Path.Combine(outPath, fileNameWithoutExt + "_org.xml"), org);
-                    File.WriteAllText(Path.Combine(outPath, fileNameWithoutExt + "_created.xml"), created);
+                    string orgFilePath = Path.Combine(outPath, fileNameWithoutExt + "_org.xml");
+                    File.WriteAllText(orgFilePath, testResult.OriginalContent);
+
+                    string createdFilePath = Path.Combine(outPath, fileNameWithoutExt + "_created.xml");
+                    File.WriteAllText(createdFilePath, testResult.CreatedContent);
+
+                    if(ExcessiveMode)
+                    {
+                        string orgBinaryFilePath = Path.Combine(outPath, fileNameWithoutExt + "_orgBinary.xml");
+                        string createdBinaryFilePath = Path.Combine(outPath, fileNameWithoutExt + "_createdBinary.xml");
+
+                        File.WriteAllText(orgBinaryFilePath, testResult.OriginalContentWithBinaryData);
+                        File.WriteAllText(createdBinaryFilePath, testResult.CreatedContentWithBinaryData);
+                    }
                 }
                 Console.WriteLine("------------------------------------------------------------");
                 Console.WriteLine();
             }
         }
 
-        private (bool, string, string) CompareTest(string path)
+        private TestResultWithFileContents CompareTest(string path, bool excessiveMode)
         {
             IFileDBDocument fileDBDoc = Program.FileToFileDbDoc(path);
 
-            return Program.CompareTest(fileDBDoc);
+            return Program.CompareTest(fileDBDoc, excessiveMode);
         }
 
     }

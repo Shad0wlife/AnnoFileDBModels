@@ -55,8 +55,8 @@ namespace SerializeGamedata_ManualTest
         {
             Console.WriteLine($"Interpreter Doc Path is \"{NestedInterpreterPath}\"");
 
-            RunOnGameFiles gameFileTester = new RunOnGameFiles();
-            RunOnIncludedTestdata includedDataTester = new RunOnIncludedTestdata();
+            RunOnGameFiles gameFileTester = new RunOnGameFiles(false);
+            //RunOnIncludedTestdata includedDataTester = new RunOnIncludedTestdata(false);
 
             await gameFileTester.RunOnAnnoGameFiles();
             //includedDataTester.RunOnIncludedTestData();
@@ -103,6 +103,11 @@ namespace SerializeGamedata_ManualTest
                     foreach (Tuple<short, AreaManagerDataItem> dataItemTuple in gd.GameSessionManager.AreaManagerData)
                     {
                         Console.WriteLine($"Deserializing nested AreaManagerData with id {dataItemTuple.Item1} at position {idx}.");
+                        if(dataItemTuple.Item2.ByteCount != dataItemTuple.Item2.Data?.Length)
+                        {
+                            Console.WriteLine($"[WARNING] AreaManagerDataItem has ByteCount {dataItemTuple.Item2.ByteCount} but array length {dataItemTuple.Item2.Data?.Length}.");
+                        }
+
                         dataItemTuple.Item2.DecompressData();
                         Console.WriteLine("Finished Deserialing nested AreaManagerData Item.");
                         idx++;
@@ -186,13 +191,20 @@ namespace SerializeGamedata_ManualTest
             }
         }
 
-        public static (bool, string, string) CompareTest(IFileDBDocument originalDoc)
+        public static TestResultWithFileContents CompareTest(IFileDBDocument originalDoc, bool excessiveMode)
         {
-            string originalDocString = FileDBToString(originalDoc, true);
+            string originalDocStringNested = FileDBToString(originalDoc, true);
+
+            string originalDocStringBinaryData;
+            if (excessiveMode)
+                originalDocStringBinaryData = FileDBToString(originalDoc, false);
+            else
+                originalDocStringBinaryData = "";
 
             Gamedata? gamedata = null;
             FileDBDocumentVersion? fileVersion = null;
             string serializedString = "<Content>";
+            string serializedStringBinaryData = "";
             try
             {
                 (gamedata, fileVersion) = DeserializeTest(originalDoc);
@@ -201,6 +213,9 @@ namespace SerializeGamedata_ManualTest
                 {
                     IFileDBDocument serialized = SerializeBack(gamedata, fileVersion.Value);
                     serializedString = FileDBToString(serialized, true);
+
+                    if(excessiveMode)
+                        serializedStringBinaryData = FileDBToString(serialized, false);
                 }
             }
             catch(InvalidProgramException ex)
@@ -208,10 +223,11 @@ namespace SerializeGamedata_ManualTest
                 Console.WriteLine("Exception during De- or Reserialization. Comparing to empty.");
                 serializedString += "<ErrorMsg>" + ex.Message + "</ErrorMsg>";
                 serializedString += "</Content>";
+                serializedStringBinaryData = serializedString;
             }
 
 
-            using (TextReader orgReader = new StringReader(originalDocString))
+            using (TextReader orgReader = new StringReader(originalDocStringNested))
             using (TextReader serializedReader = new StringReader(serializedString))
             {
                 XmlReader xmlReaderOrg = XmlReader.Create(orgReader);
@@ -220,7 +236,7 @@ namespace SerializeGamedata_ManualTest
                 XmlDiff xmlDiff = new XmlDiff(XmlDiffOptions.IgnoreChildOrder | XmlDiffOptions.IgnoreComments | XmlDiffOptions.IgnoreWhitespace);
                 bool compareResult = xmlDiff.Compare(xmlReaderOrg, xmlReaderSerialized);
 
-                return (compareResult, originalDocString, serializedString);
+                return new TestResultWithFileContents(compareResult, originalDocStringNested, serializedString, originalDocStringBinaryData, serializedStringBinaryData);
             }
         }
     }
