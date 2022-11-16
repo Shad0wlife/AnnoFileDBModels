@@ -87,15 +87,15 @@ namespace SerializeGamedata_ManualTest
             return outPath;
         }
 
-        private static (Gamedata, FileDBDocumentVersion) DeserializeTest(IFileDBDocument fileDBDocument)
+        private static (T?, FileDBDocumentVersion) DeserializeTest<T>(IFileDBDocument fileDBDocument) where T : class, new()
         {
             FileDBDocumentVersion Version = fileDBDocument.VERSION;
-            FileDBDocumentDeserializer<Gamedata> deserializer = new FileDBDocumentDeserializer<Gamedata>(new FileDBSerializerOptions() { Version = Version });
+            FileDBDocumentDeserializer<T> deserializer = new FileDBDocumentDeserializer<T>(new FileDBSerializerOptions() { Version = Version });
             var deserializedResult = deserializer.GetObjectStructureFromFileDBDocument(fileDBDocument);
 
             Console.WriteLine("Finished Deserializing.");
 
-            if (deserializedResult is Gamedata gd)
+            if (typeof(T) == typeof(Gamedata) && deserializedResult is Gamedata gd)
             {
                 if (gd.GameSessionManager?.AreaManagerData?.Count > 0)
                 {
@@ -113,27 +113,28 @@ namespace SerializeGamedata_ManualTest
                         idx++;
                     }
                 }
-                return (gd, Version);
+                return (gd as T, Version);
             }
             else
             {
-                throw new InvalidCastException("Gamedata FileDBSerializer returned an object that is not Gamedata.");
+                return (deserializedResult, Version);
             }
         }
 
-        private static IFileDBDocument SerializeBack(Gamedata toSerialize, FileDBDocumentVersion toVersion)
+        private static IFileDBDocument SerializeBack<T>(T toSerialize, FileDBDocumentVersion toVersion) where T : class, new()
         {
-            if(toSerialize.GameSessionManager?.AreaManagerData?.Count > 0)
-            {
-                int idx = 0;
-                foreach (Tuple<short, AreaManagerDataItem> dataItemTuple in toSerialize.GameSessionManager.AreaManagerData)
+            if (typeof(T) == typeof(Gamedata) && toSerialize is Gamedata gd)
+                if (gd.GameSessionManager?.AreaManagerData?.Count > 0)
                 {
-                    Console.WriteLine($"Reserializing nested AreaManagerData with id {dataItemTuple.Item1} at position {idx}.");
-                    dataItemTuple.Item2.CompressData();
-                    Console.WriteLine("Finished Reserialing nested AreaManagerData Item.");
-                    idx++;
+                    int idx = 0;
+                    foreach (Tuple<short, AreaManagerDataItem> dataItemTuple in gd.GameSessionManager.AreaManagerData)
+                    {
+                        Console.WriteLine($"Reserializing nested AreaManagerData with id {dataItemTuple.Item1} at position {idx}.");
+                        dataItemTuple.Item2.CompressData();
+                        Console.WriteLine("Finished Reserialing nested AreaManagerData Item.");
+                        idx++;
+                    }
                 }
-            }
 
             FileDBDocumentSerializer fileDBDocumentSerializer = new FileDBDocumentSerializer(new FileDBSerializerOptions() { Version = toVersion });
             IFileDBDocument fdbDoc = fileDBDocumentSerializer.WriteObjectStructureToFileDBDocument(toSerialize);
@@ -191,7 +192,7 @@ namespace SerializeGamedata_ManualTest
             }
         }
 
-        public static TestResultWithFileContents CompareTest(IFileDBDocument originalDoc, bool excessiveMode)
+        public static TestResultWithFileContents CompareTest<T>(IFileDBDocument originalDoc, bool excessiveMode) where T : class, new()
         {
             string originalDocStringNested = FileDBToString(originalDoc, true);
 
@@ -201,17 +202,17 @@ namespace SerializeGamedata_ManualTest
             else
                 originalDocStringBinaryData = "";
 
-            Gamedata? gamedata = null;
+            T? target = null;
             FileDBDocumentVersion? fileVersion = null;
             string serializedString = "<Content>";
             string serializedStringBinaryData = "";
             try
             {
-                (gamedata, fileVersion) = DeserializeTest(originalDoc);
+                (target, fileVersion) = DeserializeTest<T>(originalDoc);
 
-                if (gamedata != null && fileVersion != null)
+                if (target != null && fileVersion != null)
                 {
-                    IFileDBDocument serialized = SerializeBack(gamedata, fileVersion.Value);
+                    IFileDBDocument serialized = SerializeBack<T>(target, fileVersion.Value);
                     serializedString = FileDBToString(serialized, true);
 
                     if(excessiveMode)

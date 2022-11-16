@@ -1,4 +1,5 @@
-﻿using FileDBSerializing;
+﻿using Anno_FileDBModels.Anno1800.Gamedata.Models.Shared;
+using FileDBSerializing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,7 +51,7 @@ namespace SerializeGamedata_ManualTest
             {
                 string fileName = Path.GetFileName(testPath);
                 string fileNameWithoutExt = Path.GetFileNameWithoutExtension(testPath);
-                TestResultWithFileContents testResult = CompareTest(testPath, ExcessiveMode);
+                TestResultWithFileContents testResult = CompareTest<Gamedata>(testPath, ExcessiveMode);
 
                 Console.WriteLine();
                 Console.WriteLine("------------------------------------------------------------");
@@ -81,11 +82,11 @@ namespace SerializeGamedata_ManualTest
             }
         }
 
-        private TestResultWithFileContents CompareTest(string path, bool excessiveMode)
+        private TestResultWithFileContents CompareTest<T>(string path, bool excessiveMode) where T : class, new()
         {
             IFileDBDocument fileDBDoc = Program.FileToFileDbDoc(path);
 
-            return Program.CompareTest(fileDBDoc, excessiveMode);
+            return Program.CompareTest<T>(fileDBDoc, excessiveMode);
         }
 
     }

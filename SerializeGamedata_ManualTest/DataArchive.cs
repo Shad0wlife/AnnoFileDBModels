@@ -12,7 +12,7 @@ namespace SerializeGamedata_ManualTest
     {
         public static readonly IDataArchive Default = new InvalidDataPath("");
 
-        public static async Task<IDataArchive> OpenAsync(string? folderPath)
+        public static async Task<IDataArchive> OpenAsync(string? folderPath, params string[] fileExtensions)
         {
             if (folderPath is null)
                 return Default;
@@ -26,7 +26,7 @@ namespace SerializeGamedata_ManualTest
             if (File.Exists(Path.Combine(adjustedPath, "maindata/data0.rda")))
                 archive = new RdaDataArchive(adjustedPath);
 
-            await archive.LoadAsync();
+            await archive.LoadAsync(fileExtensions);
             return archive;
         }
 
@@ -59,9 +59,11 @@ namespace SerializeGamedata_ManualTest
         string Path { get; }
 
         IEnumerable<string> Files { get; }
+        IEnumerable<string> FilesFor(params string[] extensions);
+
         Stream? OpenRead(string filePath);
         IEnumerable<string> Find(string pattern);
-        Task LoadAsync();
+        Task LoadAsync(params string[] forEndings);
     }
 
     public class InvalidDataPath : IDataArchive
@@ -77,7 +79,7 @@ namespace SerializeGamedata_ManualTest
             Files = Enumerable.Empty<string>();
         }
 
-        public Task LoadAsync()
+        public Task LoadAsync(params string[] forEndings)
         {
             return Task.Run(() => { });
         }
@@ -85,6 +87,11 @@ namespace SerializeGamedata_ManualTest
         public IEnumerable<string> Find(string pattern)
         {
             return Array.Empty<string>();
+        }
+
+        public IEnumerable<string> FilesFor(params string[] extensions)
+        {
+            return Enumerable.Empty<string>();
         }
     }
 
@@ -120,17 +127,50 @@ namespace SerializeGamedata_ManualTest
 
         private RDAReader[]? readers;
 
-        private Dictionary<string, (RDAFile, (string, object))> allFiles { get; } = new();
+        private HashSet<string> allowedFileExtensions;
 
-        public IEnumerable<string> Files => allFiles.Keys;
+        private Dictionary<string, Dictionary<string, (RDAFile, (string, object))>> allFiles { get; } = new();
+
+        private bool filesValid = false;
+        private List<string> files = new List<string>();
+        public IEnumerable<string> Files
+        {
+            get
+            {
+                if (!filesValid)
+                {
+                    files = new List<string>();
+                    foreach (var dict in allFiles.Values)
+                    {
+                        files.AddRange(dict.Keys);
+                    }
+                    filesValid = true;
+                }
+                return files;
+            }
+        }
+
+        public IEnumerable<string> FilesFor(params string[] extensions)
+        {
+            List<string> fileList = new List<string>();
+            foreach(string s in extensions)
+            {
+                if (allFiles.ContainsKey(s))
+                {
+                    fileList.AddRange(allFiles[s].Keys);
+                }
+            }
+            return fileList;
+        }
 
         public RdaDataArchive(string folderPath)
         {
             Path = folderPath;
         }
 
-        public async Task LoadAsync()
+        public async Task LoadAsync(params string[] forEndings)
         {
+            allowedFileExtensions = new HashSet<string>(forEndings);
             await Task.Run(() =>
             {
                 // let's skip a few to speed up the loading: 0, 1, 2, 3, 4, 7, 8, 9
@@ -155,8 +195,24 @@ namespace SerializeGamedata_ManualTest
                         object readerLock = new object();
                         reader.ReadRDAFile();
                         foreach (var file in reader.rdaFolder.GetAllFiles())
-                            if (file.FileName.EndsWith(".a7m") || file.FileName.EndsWith(".a7t"))
-                                allFiles[file.FileName] = (file, (System.IO.Path.GetFileNameWithoutExtension(x), readerLock));
+                        {
+                            string fileExtension = System.IO.Path.GetExtension(file.FileName);
+
+                            if (!allowedFileExtensions.Contains(fileExtension))
+                            {
+                                continue;
+                            }
+
+
+                            if (!allFiles.ContainsKey(fileExtension))
+                            {
+                                allFiles.Add(fileExtension, new());
+                            }
+
+                            allFiles[fileExtension][file.FileName] = (file, (System.IO.Path.GetFileNameWithoutExtension(x), readerLock));
+
+                            filesValid = false;
+                        }
                         return reader;
                     }
                     catch (Exception e)
@@ -180,6 +236,13 @@ namespace SerializeGamedata_ManualTest
 
         public Stream? OpenRead(string filePath)
         {
+            string targetExt = System.IO.Path.GetExtension(filePath);
+            Dictionary<string, (RDAFile, (string, object))> targetDict;
+            if (!allFiles.ContainsKey(targetExt))
+                return null;
+            else
+                targetDict = allFiles[targetExt];
+
             if (!IsValid || readers is null)
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
@@ -189,7 +252,7 @@ namespace SerializeGamedata_ManualTest
             }
             Stream? stream = null;
 
-            if (!allFiles.TryGetValue(filePath.Replace('\\', '/'), out (RDAFile rdaFile, (string lockName, object readerLock) mutexPack) file) || file.rdaFile is null || file.mutexPack.readerLock is null)
+            if (!targetDict.TryGetValue(filePath.Replace('\\', '/'), out (RDAFile rdaFile, (string lockName, object readerLock) mutexPack) file) || file.rdaFile is null || file.mutexPack.readerLock is null)
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine($"not found in archive: {filePath}");
