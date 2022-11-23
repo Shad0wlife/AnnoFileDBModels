@@ -55,11 +55,12 @@ namespace SerializeGamedata_ManualTest
         {
             Console.WriteLine($"Interpreter Doc Path is \"{NestedInterpreterPath}\"");
 
-            RunOnGameFiles gameFileTester = new RunOnGameFiles(false);
-            //RunOnIncludedTestdata includedDataTester = new RunOnIncludedTestdata(false);
+            //RunOnGameFiles gameFileTester = new RunOnGameFiles(false);
+            RunOnIncludedTestdata includedDataTester = new RunOnIncludedTestdata(false);
 
-            await gameFileTester.RunOnAnnoGameFiles();
-            //includedDataTester.RunOnIncludedTestData();
+            //await gameFileTester.RunOnAnnoGameFiles();
+            //includedDataTester.RunOnIncludedGamedata();
+            includedDataTester.RunOnIncludedTemplates();
 
             Console.WriteLine("Press Enter to exit.");
             Console.ReadLine();

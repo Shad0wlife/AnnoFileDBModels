@@ -1,10 +1,16 @@
 ﻿using Anno_FileDBModels.Anno1800.Gamedata.Models.Shared;
+using Anno_FileDBModels.Anno1800.MapTemplate;
+using FileDBReader;
+using FileDBReader.src;
+using FileDBReader.src.XmlRepresentation;
 using FileDBSerializing;
+using FileDBSerializing.ObjectSerializer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace SerializeGamedata_ManualTest
 {
@@ -17,21 +23,31 @@ namespace SerializeGamedata_ManualTest
 
         private bool ExcessiveMode { get; }
 
-        public void RunOnIncludedTestData()
+        public string WorkingDirectory => Environment.CurrentDirectory;
+        public string ProjectDirectory => Directory.GetParent(WorkingDirectory).Parent.Parent.FullName;
+
+        public const string TestDataFolderName = "TestData";
+        public const string MapTestDataFolderName = "Map";
+        public const string IslandTestDataFolderName = "Island";
+        public const string MapTemplateTestDataFolderName = "InterpretedTemplates";
+
+        public string GetFilePathFromTestDataFolder(string testFolder, string fileName)
         {
-            string workingDirectory = Environment.CurrentDirectory;
-            string projectDirectory = Directory.GetParent(workingDirectory).Parent.Parent.FullName;
+            return Path.Combine(ProjectDirectory, TestDataFolderName, testFolder, fileName);
+        }
 
-            string newSnowflakePath = Path.Combine(projectDirectory, @"TestData\Map\moderate_snowflake_ss_01_gamedata.data");
-            string oldMapPath = Path.Combine(projectDirectory, @"TestData\Map\gamedata_1408_old.data");
-            string nwPoolMap = Path.Combine(projectDirectory, @"TestData\Map\colony01_l_03_gamedata.data");
-            string scenario03Map = Path.Combine(projectDirectory, @"TestData\Map\scenario_03_colony_01_gamedata.data");
-            string enbesaMap = Path.Combine(projectDirectory, @"TestData\Map\colony02_01_gamedata.data");
-            string arcticMap = Path.Combine(projectDirectory, @"TestData\Map\colony_03_sp_gamedata.data");
+        public void RunOnIncludedGamedata()
+        {
+            string newSnowflakePath = GetFilePathFromTestDataFolder(MapTestDataFolderName, @"moderate_snowflake_ss_01_gamedata.data");
+            string oldMapPath = GetFilePathFromTestDataFolder(MapTestDataFolderName, @"gamedata_1408_old.data");
+            string nwPoolMap = GetFilePathFromTestDataFolder(MapTestDataFolderName, @"colony01_l_03_gamedata.data");
+            string scenario03Map = GetFilePathFromTestDataFolder(MapTestDataFolderName, @"scenario_03_colony_01_gamedata.data");
+            string enbesaMap = GetFilePathFromTestDataFolder(MapTestDataFolderName, @"colony02_01_gamedata.data");
+            string arcticMap = GetFilePathFromTestDataFolder(MapTestDataFolderName, @"colony_03_sp_gamedata.data");
 
 
-            string communityIslandPath = Path.Combine(projectDirectory, @"TestData\Island\community_island_a7m_gamedata.data");
-            string scenario03StoryIsland01 = Path.Combine(projectDirectory, @"TestData\Island\scenario03_storyisland_01_gamedata.data");
+            string communityIslandPath = GetFilePathFromTestDataFolder(IslandTestDataFolderName, @"community_island_a7m_gamedata.data");
+            string scenario03StoryIsland01 = GetFilePathFromTestDataFolder(IslandTestDataFolderName, @"scenario03_storyisland_01_gamedata.data");
 
             List<string> allTestFiles = new List<string>()
             {
@@ -79,6 +95,64 @@ namespace SerializeGamedata_ManualTest
                 }
                 Console.WriteLine("------------------------------------------------------------");
                 Console.WriteLine();
+            }
+        }
+
+        public void RunOnIncludedTemplates()
+        {
+            string campaign_ch03 = GetFilePathFromTestDataFolder(MapTemplateTestDataFolderName, @"campaign_chapter03_colony01.xml");
+            string colonly02 = GetFilePathFromTestDataFolder(MapTemplateTestDataFolderName, @"colony02_01.xml");
+            string capeMap = GetFilePathFromTestDataFolder(MapTemplateTestDataFolderName, @"moderate_c_01.xml");
+            string islandarc = GetFilePathFromTestDataFolder(MapTemplateTestDataFolderName, @"moderate_islandarc_ss_01.xml");
+            string scenario = GetFilePathFromTestDataFolder(MapTemplateTestDataFolderName, @"scenario_02_colony_01.xml");
+
+            List<string> allTestFiles = new List<string>()
+            {
+                campaign_ch03,
+                colonly02,
+                capeMap,
+                islandarc,
+                scenario,
+            };
+
+            string outPath = Program.CreateCleanLocalOutputDir();
+
+            string interpreterPath = Path.Combine(ProjectDirectory, @"TestData\InterpretedTemplates\UsedInterpreter\a7tinfo.xml");
+            Interpreter interpr;
+
+            using (FileStream interpreterStream = File.OpenRead(interpreterPath))
+            {
+                XmlDocument interpreterDocument = new();
+                interpreterDocument.Load(interpreterStream);
+                interpr = new Interpreter(interpreterDocument);
+            }
+
+            foreach (string testPath in allTestFiles)
+            {
+                string fileName = Path.GetFileName(testPath);
+                string fileNameWithoutExt = Path.GetFileNameWithoutExtension(testPath);
+
+
+
+                using (FileStream fs = File.OpenRead(testPath))
+                {
+                    // load xml
+                    XmlDocument xmlDocument = new();
+                    xmlDocument.Load(fs);
+
+                    // convert to bytes
+
+
+                    XmlDocument xmlWithBytes = new XmlExporter().Export(xmlDocument, interpr);
+
+                    // convert to FileDB
+                    XmlFileDbConverter converter = new(FileDBDocumentVersion.Version3);
+                    IFileDBDocument doc = converter.ToFileDb(xmlWithBytes);
+
+                    // construct deserialize into objects
+                    FileDBDocumentDeserializer<MapTemplateDocument> deserializer = new(new FileDBSerializerOptions() { IgnoreMissingProperties = true });
+                    MapTemplateDocument res = deserializer.GetObjectStructureFromFileDBDocument(doc);
+                }
             }
         }
 
