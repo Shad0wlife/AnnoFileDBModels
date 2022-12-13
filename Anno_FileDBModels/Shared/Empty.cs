@@ -1,4 +1,4 @@
-﻿namespace Anno_FileDBModels.Shared
+﻿namespace Anno.FileDBModels.Shared
 {
     public class Empty
     {

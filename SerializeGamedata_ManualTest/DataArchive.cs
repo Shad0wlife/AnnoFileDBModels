@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace SerializeGamedata_ManualTest
+namespace SerializeGamedata.ManualTest
 {
     public static class DataArchive
     {

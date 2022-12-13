@@ -1,5 +1,5 @@
-﻿using Anno_FileDBModels.Anno1800.Gamedata.Models.Shared;
-using Anno_FileDBModels.Anno1800.MapTemplate;
+﻿using Anno.FileDBModels.Anno1800.Gamedata.Models.Shared;
+using Anno.FileDBModels.Anno1800.MapTemplate;
 using FileDBSerializing;
 using FileDBSerializing.ObjectSerializer;
 using Microsoft.Win32;
@@ -11,7 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SerializeGamedata_ManualTest
+namespace SerializeGamedata.ManualTest
 {
     public class RunOnGameFiles
     {
@@ -71,9 +71,9 @@ namespace SerializeGamedata_ManualTest
             IEnumerable<string> messages;
             string errorFilePath;
             //Gamedata
-            //errorFilePath = Path.Combine(outPath, "_gamedata_fileErrors.txt");
-            //messages = RunOnArchiveParallel(archive, outPath, UnpackNestedGamedataAndTest, MAP_GAMEDATA_EXTENSION, ISLAND_GAMEDATA_EXTENSION);
-            //File.WriteAllLines(errorFilePath, messages);
+            errorFilePath = Path.Combine(outPath, "_gamedata_fileErrors.txt");
+            messages = RunOnArchiveParallel(archive, outPath, UnpackNestedGamedataAndTest, MAP_GAMEDATA_EXTENSION, ISLAND_GAMEDATA_EXTENSION);
+            File.WriteAllLines(errorFilePath, messages);
 
             //Map Templates
             errorFilePath = Path.Combine(outPath, "_a7tinfo_fileErrors.txt");

@@ -14,7 +14,7 @@
     
   <ItemGroup>
     <!-- Anno_FileDBModels.Shared for general purpose shared classes like Empty -->
-    <Using Include="Anno_FileDBModels.Shared"/>
+    <Using Include="Anno.FileDBModels.Shared"/>
     <!-- For Tuples -->
     <Using Include="System"/>
     <!-- For Lists -->

@@ -1,4 +1,4 @@
-﻿using Anno_FileDBModels.Anno1800.Gamedata.Models.Shared;
+﻿using Anno.FileDBModels.Anno1800.Gamedata.Models.Shared;
 using FileDBReader;
 using FileDBReader.src;
 using InterpreterDoc = FileDBReader.src.Interpreter;
@@ -8,7 +8,7 @@ using FileDBSerializing.ObjectSerializer;
 using Microsoft.XmlDiffPatch;
 using System.Xml;
 
-namespace SerializeGamedata_ManualTest
+namespace SerializeGamedata.ManualTest
 {
     public class Program
     {
@@ -55,12 +55,12 @@ namespace SerializeGamedata_ManualTest
         {
             Console.WriteLine($"Interpreter Doc Path is \"{NestedInterpreterPath}\"");
 
-            //RunOnGameFiles gameFileTester = new RunOnGameFiles(false);
+            RunOnGameFiles gameFileTester = new RunOnGameFiles(false);
             RunOnIncludedTestdata includedDataTester = new RunOnIncludedTestdata(false);
 
-            //await gameFileTester.RunOnAnnoGameFiles();
+            await gameFileTester.RunOnAnnoGameFiles();
             //includedDataTester.RunOnIncludedGamedata();
-            includedDataTester.RunOnIncludedTemplates();
+            //includedDataTester.RunOnIncludedTemplates();
 
             Console.WriteLine("Press Enter to exit.");
             Console.ReadLine();

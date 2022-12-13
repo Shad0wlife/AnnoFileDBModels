@@ -1,7 +1,7 @@
 ﻿using FileDBSerializing.EncodingAwareStrings;
 using FileDBSerializing.ObjectSerializer;
 
-namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared
+namespace Anno.FileDBModels.Anno1800.Gamedata.Models.Shared
 {
     public class CameraSequenceManager
     {

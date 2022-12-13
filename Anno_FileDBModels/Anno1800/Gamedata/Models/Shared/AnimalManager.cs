@@ -1,6 +1,6 @@
-﻿using Anno_FileDBModels.Anno1800.Gamedata.Models.Shared.Grids;
+﻿using Anno.FileDBModels.Anno1800.Gamedata.Models.Shared.Grids;
 
-namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared
+namespace Anno.FileDBModels.Anno1800.Gamedata.Models.Shared
 {
     public class AnimalManager
     {

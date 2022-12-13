@@ -1,6 +1,6 @@
 ﻿using FileDBSerializer.ObjectSerializer;
 
-namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared.Grids
+namespace Anno.FileDBModels.Anno1800.Gamedata.Models.Shared.Grids
 {
     [PropertyLocation(PropertyLocationOption.AFTER_PARENT)]
     public class ShortGrid : SparseGridBase<blockShort, short>

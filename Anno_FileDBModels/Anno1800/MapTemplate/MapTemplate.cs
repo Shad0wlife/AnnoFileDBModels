@@ -1,7 +1,7 @@
 ﻿using FileDBSerializing.ObjectSerializer;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Anno_FileDBModels.Anno1800.MapTemplate
+namespace Anno.FileDBModels.Anno1800.MapTemplate
 {
     public class MapTemplate
     {

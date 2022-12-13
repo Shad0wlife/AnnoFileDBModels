@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SerializeGamedata_ManualTest
+namespace SerializeGamedata.ManualTest
 {
     public class TestResultWithFileContents
     {

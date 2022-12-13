@@ -1,6 +1,6 @@
 ﻿using FileDBSerializing.EncodingAwareStrings;
 
-namespace Anno_FileDBModels.Anno1800.Gamedata.Models.Shared
+namespace Anno.FileDBModels.Anno1800.Gamedata.Models.Shared
 {
     public class GameObjectManager
     {

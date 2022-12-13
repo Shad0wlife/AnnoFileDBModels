@@ -1,5 +1,5 @@
-﻿using Anno_FileDBModels.Anno1800.Gamedata.Models.Shared;
-using Anno_FileDBModels.Anno1800.MapTemplate;
+﻿using Anno.FileDBModels.Anno1800.Gamedata.Models.Shared;
+using Anno.FileDBModels.Anno1800.MapTemplate;
 using FileDBReader;
 using FileDBReader.src;
 using FileDBReader.src.XmlRepresentation;
@@ -12,7 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace SerializeGamedata_ManualTest
+namespace SerializeGamedata.ManualTest
 {
     public class RunOnIncludedTestdata
     {
