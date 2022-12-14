@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Anno_FileDBModels\Anno_FileDBModels.csproj" />
+    <ProjectReference Include="..\Anno.FileDBModels\Anno.FileDBModels.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -16,7 +16,7 @@
       <HintPath>lib\FileDBReader.dll</HintPath>
     </Reference>
     <Reference Include="FileDBSerializer">
-      <HintPath>..\Anno_FileDBModels\lib\FileDBSerializer.dll</HintPath>
+      <HintPath>..\Anno.FileDBModels\lib\FileDBSerializer.dll</HintPath>
     </Reference>
     <Reference Include="RDAExplorer">
       <HintPath>lib\RDAExplorer.dll</HintPath>

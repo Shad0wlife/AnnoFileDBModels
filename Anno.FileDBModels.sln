@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Anno_FileDBModels", "Anno_FileDBModels\Anno_FileDBModels.csproj", "{39686C52-B8E9-46EB-9545-E9417DA51621}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = ".", "Anno.FileDBModels\Anno.FileDBModels.csproj", "{39686C52-B8E9-46EB-9545-E9417DA51621}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerializeGamedata_ManualTest", "SerializeGamedata_ManualTest\SerializeGamedata_ManualTest.csproj", "{16B2909E-9E46-448D-A198-E30674CD3262}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerializeGamedata.ManualTest", "SerializeGamedata.ManualTest\SerializeGamedata.ManualTest.csproj", "{16B2909E-9E46-448D-A198-E30674CD3262}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
