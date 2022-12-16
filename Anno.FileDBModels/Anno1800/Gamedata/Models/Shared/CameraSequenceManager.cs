@@ -67,6 +67,7 @@ namespace Anno.FileDBModels.Anno1800.Gamedata.Models.Shared
 
     public class CamSequenceConstraint
     {
+        public int? ConstraintType { get; set; }
         public ConstraintItem? Constraint { get; set; }
     }
 

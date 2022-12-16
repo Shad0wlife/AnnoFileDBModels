@@ -118,6 +118,7 @@ namespace Anno.FileDBModels.Anno1800.Gamedata.Models.Shared
         public Empty? CoopPingManager { get; set; }
         public Empty? MemorizeManager { get; set; }
         public SeasonManager? SeasonManager { get; set; }
+        public SessionCooldownManager? SessionCooldownManager { get; set; }
         public Empty? AreaManager { get; set; }
         public Empty? AreaLinks { get; set; }
         public ShortGrid? AreaIDs { get; set; }

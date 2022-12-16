@@ -7,6 +7,8 @@ namespace Anno.FileDBModels.Anno1800.MapTemplate
     {
         public int[]? Size { get; set; }
         public int[]? PlayableArea { get; set; }
+        public int[]? InitialPlayableArea { get; set; }
+        public bool? IsEnlargedTemplate { get; set; }
         public List<RandomlyPlacedThirdParty>? RandomlyPlacedThirdParties { get; set; }
         public int? ElementCount { get; set; }
 

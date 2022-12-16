@@ -53,6 +53,7 @@ namespace Anno.FileDBModels.Anno1800.Gamedata.Models.Shared.AreaManagerData.Game
 
         //MESH
         public Mesh? Mesh { get; set; }
+        public Projectile? Projectile { get; set; }
         public FogBank? FogBank { get; set; }
         public Empty? EcoSystemProvider { get; set; }
         public DynamicVariation? DynamicVariation { get; set; }
@@ -347,19 +348,6 @@ namespace Anno.FileDBModels.Anno1800.Gamedata.Models.Shared.AreaManagerData.Game
     public class DynamicVariation
     {
         public UnicodeString? ConfigFilename { get; set; }
-    }
-
-    public class Monument
-    {
-        public ProductionState? ProductionState { get; set; }
-        public int[]? EventRewards { get; set; } //int[] is a guess here, but I expect GUIDs
-        public Empty? EventRewards2 { get; set; } //probably some list type, but always empty in ggj large island 01
-        public Empty? EventPreparation { get; set; }
-        public long? lastReducedAttractivenessTimestamp { get; set; }
-        public int? feedbackTextAmount { get; set; }
-        public int[]? FeedbackTextIcon { get; set; } //int[] is a guess here, it's just zeroes
-        public int[]? FeedbackTextGUID { get; set; } //int[] is a guess here, it's just zeroes
-        public float[]? FeedbackTextPosition { get; set; } //float[] is a guess here, it's just zeroes, but positions are usually floats
     }
 
     public class FogBank

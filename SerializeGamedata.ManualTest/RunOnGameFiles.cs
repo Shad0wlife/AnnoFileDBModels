@@ -72,12 +72,12 @@ namespace SerializeGamedata.ManualTest
             string errorFilePath;
             //Gamedata
             errorFilePath = Path.Combine(outPath, "_gamedata_fileErrors.txt");
-            messages = RunOnArchiveParallel(archive, outPath, UnpackNestedGamedataAndTest, MAP_GAMEDATA_EXTENSION, ISLAND_GAMEDATA_EXTENSION);
+            messages = RunOnArchiveParallel(archive, outPath, UnpackNestedGamedataAndTest, true, MAP_GAMEDATA_EXTENSION, ISLAND_GAMEDATA_EXTENSION);
             File.WriteAllLines(errorFilePath, messages);
 
             //Map Templates
             errorFilePath = Path.Combine(outPath, "_a7tinfo_fileErrors.txt");
-            messages = RunOnArchiveParallel(archive, outPath, UnpackMapTemplatesAndTest, MAP_TEMPLATE_EXTENSION);
+            messages = RunOnArchiveParallel(archive, outPath, UnpackMapTemplatesAndTest, false, MAP_TEMPLATE_EXTENSION);
             File.WriteAllLines(errorFilePath, messages);
 
             //Clean up replace ops, just in case the program does not end here at some point in the future :D
@@ -118,10 +118,15 @@ namespace SerializeGamedata.ManualTest
             return testInfo.failureMessages;
         }
 
-        private IEnumerable<string> RunOnArchiveParallel(IDataArchive archive, string outFolder, Action<string, TestInformationParams> testFunction, params string[] fileExtensions)
+        private IEnumerable<string> RunOnArchiveParallel(IDataArchive archive, string outFolder, Action<string, TestInformationParams> testFunction, bool runShuffle, params string[] fileExtensions)
         {
             IEnumerable<string> targetCollection = archive.FilesFor(fileExtensions);
             int fileCount = targetCollection.Count();
+
+            if (runShuffle)
+            {
+                targetCollection = Program.ShuffleToList(targetCollection);
+            }
 
             TestInformationParams testInfo = new TestInformationParams(fileCount, archive, outFolder);
 

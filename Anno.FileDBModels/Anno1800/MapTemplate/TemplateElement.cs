@@ -24,6 +24,7 @@ namespace Anno.FileDBModels.Anno1800.MapTemplate
         public RandomIslandConfig? RandomIslandConfig { get; set; }
 
         // ElementType=1
+        public bool? Locked { get; set; } //Maybe also valid for ElementType=0?
         public short? Size { get; set; }
         public Difficulty? Difficulty { get; set; }
         public Config? Config { get; set; }

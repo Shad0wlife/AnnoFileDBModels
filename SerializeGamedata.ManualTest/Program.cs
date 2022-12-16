@@ -88,6 +88,24 @@ namespace SerializeGamedata.ManualTest
             return outPath;
         }
 
+        public static List<T> ShuffleToList<T>(IEnumerable<T> input)
+        {
+            Random rng = new Random();
+            List<T> list = new List<T>(input);
+
+            int n = list.Count;
+            while(n > 1)
+            {
+                n--;
+                int k = rng.Next(n + 1);
+                T value = list[k];
+                list[k] = list[n];
+                list[n] = value;
+            }
+
+            return list;
+        }
+
         private static (T?, FileDBDocumentVersion) DeserializeTest<T>(IFileDBDocument fileDBDocument) where T : class, new()
         {
             FileDBDocumentVersion Version = fileDBDocument.VERSION;
