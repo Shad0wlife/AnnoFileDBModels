@@ -180,9 +180,9 @@ namespace SerializeGamedata.ManualTest
 
         private static XmlDocument InterpretNestedFileDB(XmlDocument toInterpret)
         {
-            XmlInterpreter interpreter = new XmlInterpreter();
+            XmlInterpreter interpreter = new XmlInterpreter(toInterpret, NestedInterpreter);
 
-            return interpreter.Interpret(toInterpret, NestedInterpreter);
+            return interpreter.Run();
         }
 
         private static string FileDBToString(IFileDBDocument doc, bool interpretNested)

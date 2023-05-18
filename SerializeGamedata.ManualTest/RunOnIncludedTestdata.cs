@@ -143,7 +143,7 @@ namespace SerializeGamedata.ManualTest
                     // convert to bytes
 
 
-                    XmlDocument xmlWithBytes = new XmlExporter().Export(xmlDocument, interpr);
+                    XmlDocument xmlWithBytes = new XmlExporter(xmlDocument, interpr).Run();
 
                     // convert to FileDB
                     XmlFileDbConverter converter = new(FileDBDocumentVersion.Version3);
