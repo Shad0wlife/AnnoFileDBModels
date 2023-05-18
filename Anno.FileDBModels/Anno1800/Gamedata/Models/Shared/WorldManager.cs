@@ -1,4 +1,4 @@
-﻿using Anno.FileDBModels.Anno1800.Gamedata.Models.Shared.Grids;
+﻿using Anno.FileDBModels.Anno1800.Shared.Grids;
 
 namespace Anno.FileDBModels.Anno1800.Gamedata.Models.Shared
 {

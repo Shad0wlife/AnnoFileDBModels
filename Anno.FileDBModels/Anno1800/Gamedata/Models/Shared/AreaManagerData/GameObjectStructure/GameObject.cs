@@ -253,6 +253,7 @@ namespace Anno.FileDBModels.Anno1800.Gamedata.Models.Shared.AreaManagerData.Game
     public class Factory7
     {
         public ProductionState? ProductionState { get; set; }
+        public int? CurrentProductivity { get; set; }
     }
 
     public class ProductionState

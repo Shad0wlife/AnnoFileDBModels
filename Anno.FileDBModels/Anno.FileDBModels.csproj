@@ -14,11 +14,11 @@
     
   <ItemGroup>
     <!-- Anno_FileDBModels.Shared for general purpose shared classes like Empty -->
-    <Using Include="Anno.FileDBModels.Shared"/>
+    <Using Include="Anno.FileDBModels.Shared" />
     <!-- For Tuples -->
-    <Using Include="System"/>
+    <Using Include="System" />
     <!-- For Lists -->
-    <Using Include="System.Collections.Generic"/>
+    <Using Include="System.Collections.Generic" />
   </ItemGroup>
 
 </Project>

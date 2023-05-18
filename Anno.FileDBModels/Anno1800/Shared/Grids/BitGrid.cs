@@ -1,4 +1,4 @@
-﻿namespace Anno.FileDBModels.Anno1800.Gamedata.Models.Shared.Grids
+﻿namespace Anno.FileDBModels.Anno1800.Shared.Grids
 {
     public class BitGrid
     {
@@ -21,6 +21,13 @@
             y = ySize;
 
             bits = new byte[xSize * ySize / 8];
+        }
+
+        public BitGrid(int xSize, int ySize, int customBitsSize)
+        {
+            x = xSize;
+            y = ySize;
+            bits = new byte[customBitsSize];
         }
 
         public int x { get; set; }

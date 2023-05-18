@@ -1,4 +1,5 @@
 ﻿using Anno.FileDBModels.Anno1800.Gamedata.Models.Shared;
+using Anno.FileDBModels.Anno1800.IslandTemplate;
 using Anno.FileDBModels.Anno1800.MapTemplate;
 using FileDBSerializing;
 using FileDBSerializing.ObjectSerializer;
@@ -26,6 +27,7 @@ namespace SerializeGamedata.ManualTest
         public const string MAP_TEMPLATE_EXTENSION = ".a7tinfo";
 
         public const string ISLAND_GAMEDATA_EXTENSION = ".a7m";
+        public const string ISLAND_TEMPLATE_EXTENSION = ".a7minfo";
 
         /// <summary>
         /// Test different values for best performance.
@@ -60,7 +62,7 @@ namespace SerializeGamedata.ManualTest
             string outPath = Program.CreateCleanLocalOutputDir();
 
             Console.WriteLine("Opening game files.");
-            IDataArchive archive = await DataArchive.OpenAsync(gamePath, MAP_GAMEDATA_EXTENSION, ISLAND_GAMEDATA_EXTENSION, MAP_TEMPLATE_EXTENSION);
+            IDataArchive archive = await DataArchive.OpenAsync(gamePath, MAP_GAMEDATA_EXTENSION, ISLAND_GAMEDATA_EXTENSION, MAP_TEMPLATE_EXTENSION, ISLAND_TEMPLATE_EXTENSION);
             int fileCount = archive.Files.Count();
             Console.WriteLine($"Finished scanning game files, found {fileCount} candidates.");
 
@@ -70,6 +72,7 @@ namespace SerializeGamedata.ManualTest
 
             IEnumerable<string> messages;
             string errorFilePath;
+            
             //Gamedata
             errorFilePath = Path.Combine(outPath, "_gamedata_fileErrors.txt");
             messages = RunOnArchiveParallel(archive, outPath, UnpackNestedGamedataAndTest, true, MAP_GAMEDATA_EXTENSION, ISLAND_GAMEDATA_EXTENSION);
@@ -78,6 +81,11 @@ namespace SerializeGamedata.ManualTest
             //Map Templates
             errorFilePath = Path.Combine(outPath, "_a7tinfo_fileErrors.txt");
             messages = RunOnArchiveParallel(archive, outPath, UnpackMapTemplatesAndTest, false, MAP_TEMPLATE_EXTENSION);
+            File.WriteAllLines(errorFilePath, messages);
+
+            //Island Templates
+            errorFilePath = Path.Combine(outPath, "_a7minfo_fileErrors.txt");
+            messages = RunOnArchiveParallel(archive, outPath, UnpackIslandTemplatesAndTest, false, ISLAND_TEMPLATE_EXTENSION);
             File.WriteAllLines(errorFilePath, messages);
 
             //Clean up replace ops, just in case the program does not end here at some point in the future :D
@@ -248,13 +256,13 @@ namespace SerializeGamedata.ManualTest
             {
                 try
                 {
-                    TestDeserializeMapTemplate(itemStream, file, testInfoTracker.outputFolder);
+                    TestDeserializeTemplate<MapTemplateDocument>(itemStream, file, testInfoTracker.outputFolder);
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error {ex.GetType()} with Message \"{ex.Message}\" on gamedata.data from {file}");
+                    Console.WriteLine($"Error {ex.GetType()} with Message \"{ex.Message}\" on a7tinfo from {file}");
 
-                    string outFileName = Path.GetFileNameWithoutExtension(file) + "_" + "gamedata.data";
+                    string outFileName = Path.GetFileNameWithoutExtension(file) + "_" + "template.a7tinfo";
                     using (FileStream fs = File.OpenWrite(Path.Combine(testInfoTracker.outputFolder, outFileName)))
                     {
                         itemStream?.CopyTo(fs);
@@ -267,14 +275,43 @@ namespace SerializeGamedata.ManualTest
             Console.WriteLine();
         }
 
-        private void TestDeserializeMapTemplate(Stream templateStream, string file, string outPath)
+        private void UnpackIslandTemplatesAndTest(string file, TestInformationParams testInfoTracker)
+        {
+            Interlocked.Increment(ref testInfoTracker.counter);
+
+            Console.WriteLine($"[{testInfoTracker.counter}/{testInfoTracker.maxCount}] - Handling a7minfo file: {file}");
+            string fileName = Path.GetFileNameWithoutExtension(file);
+            using (Stream? itemStream = testInfoTracker.archive.OpenRead(file))
+            {
+                try
+                {
+                    TestDeserializeTemplate<IslandTemplateDocument>(itemStream, file, testInfoTracker.outputFolder);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error {ex.GetType()} with Message \"{ex.Message}\" on a7minfo from {file}");
+
+                    string outFileName = Path.GetFileNameWithoutExtension(file) + "_" + "template.a7minfo";
+                    using (FileStream fs = File.OpenWrite(Path.Combine(testInfoTracker.outputFolder, outFileName)))
+                    {
+                        itemStream?.CopyTo(fs);
+                    }
+
+                    testInfoTracker.failureMessages.Add($"{outFileName} -> {ex.Message}");
+                }
+
+            }
+            Console.WriteLine();
+        }
+
+        private void TestDeserializeTemplate<TEMPLATE>(Stream templateStream, string file, string outPath) where TEMPLATE : class, new()
         {
             Console.WriteLine($"Trying to parse map template from \"{file}\".");
             string debugName = Path.GetFileNameWithoutExtension(file);
 
             IFileDBDocument fileDBDocument = Program.StreamToFileDbDoc(templateStream);
 
-            TestResultWithFileContents testResult = Program.CompareTest<MapTemplateDocument>(fileDBDocument, false); //No nested data for excessive mode in a7tinfo
+            TestResultWithFileContents testResult = Program.CompareTest<TEMPLATE>(fileDBDocument, false); //No nested data for excessive mode in a7tinfo
 
             Console.WriteLine();
             Console.WriteLine("------------------------------------------------------------");

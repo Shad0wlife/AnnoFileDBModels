@@ -231,11 +231,27 @@ namespace SerializeGamedata.ManualTest
 
                 if (target != null && fileVersion != null)
                 {
+                    if(target is Anno.FileDBModels.Anno1800.IslandTemplate.IslandTemplateDocument itd)
+                    {
+                        Anno.FileDBModels.Anno1800.IslandTemplate.IslandTemplateDocument copy = new Anno.FileDBModels.Anno1800.IslandTemplate.IslandTemplateDocument(itd.MapSize[0]);
+                        Console.WriteLine($"[IslandTemplate] ActiveMapGrid has {itd.ActiveMapGrid.bits.Length*8} bits, " +
+                            $"the IslandSize is {itd.MapSize[0]}x{itd.MapSize[1]}, " +
+                            $"and an ActiveMapGrid size of {itd.ActiveMapGrid.x}x{itd.ActiveMapGrid.y}={itd.ActiveMapGrid.x * itd.ActiveMapGrid.y} " +
+                            $"with an array of size {itd.ActiveMapGrid.bits.Length * 8}: " +
+                            $"--> bits/size = {((double)itd.ActiveMapGrid.bits.Length * 8)/(itd.ActiveMapGrid.x * itd.ActiveMapGrid.y)}" +
+                            $"\r\n\t\tThe copy now has a map size of {copy.MapSize[0]}x{copy.MapSize[1]}, " +
+                            $"and an ActiveMapGrid size of {copy.ActiveMapGrid.x}x{copy.ActiveMapGrid.y}={copy.ActiveMapGrid.x * copy.ActiveMapGrid.y} " +
+                            $"with an array of size {copy.ActiveMapGrid.bits.Length * 8}: " +
+                            $"--> bits/size = {((double)copy.ActiveMapGrid.bits.Length * 8) / (copy.ActiveMapGrid.x * copy.ActiveMapGrid.y)}");
+                    }
+
                     IFileDBDocument serialized = SerializeBack<T>(target, fileVersion.Value);
                     serializedString = FileDBToString(serialized, true);
 
-                    if(excessiveMode)
+                    if (excessiveMode)
                         serializedStringBinaryData = FileDBToString(serialized, false);
+
+
                 }
             }
             catch(InvalidProgramException ex)
@@ -254,7 +270,16 @@ namespace SerializeGamedata.ManualTest
                 XmlReader xmlReaderSerialized = XmlReader.Create(serializedReader);
 
                 XmlDiff xmlDiff = new XmlDiff(XmlDiffOptions.IgnoreChildOrder | XmlDiffOptions.IgnoreComments | XmlDiffOptions.IgnoreWhitespace);
-                bool compareResult = xmlDiff.Compare(xmlReaderOrg, xmlReaderSerialized);
+                bool compareResult = false;
+                try
+                {
+                    compareResult = xmlDiff.Compare(xmlReaderOrg, xmlReaderSerialized);
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine($"Exception during XML Compare: {ex.Message}");
+                }
+                
 
                 return new TestResultWithFileContents(compareResult, originalDocStringNested, serializedString, originalDocStringBinaryData, serializedStringBinaryData);
             }
