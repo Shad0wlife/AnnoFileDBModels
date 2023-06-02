@@ -7,16 +7,16 @@
 
         }
 
-        public Gamedata(int mapSize, int playableSize, string ambientName, byte[] areaManagerData)
+        public Gamedata(int mapSize, (int x, int y, int size) playableArea, string ambientName, byte[] areaManagerData)
         {
             FileVersion = 8;
-            GameSessionManager = new GameSessionManager(mapSize, playableSize, ambientName, areaManagerData);
+            GameSessionManager = new GameSessionManager(mapSize, playableArea, ambientName, areaManagerData);
         }
 
-        public Gamedata(int mapSize, int playableSize, string ambientName, bool createAreaManagerData)
+        public Gamedata(int mapSize, (int x, int y, int size) playableArea, string ambientName, bool createAreaManagerData)
         {
             FileVersion = 8;
-            GameSessionManager = new GameSessionManager(mapSize, playableSize, ambientName, createAreaManagerData);
+            GameSessionManager = new GameSessionManager(mapSize, playableArea, ambientName, createAreaManagerData);
         }
 
         public int? FileVersion { get; set; }

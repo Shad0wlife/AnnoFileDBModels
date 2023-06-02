@@ -13,14 +13,12 @@ namespace Anno.FileDBModels.Anno1800.Gamedata.Models.Shared
         /// Session Settings for a Map
         /// </summary>
         /// <param name="ambientName"></param>
-        /// <param name="mapSize"></param>
-        /// <param name="playableSize"></param>
-        public SessionSettings(string ambientName, int mapSize, int playableSize)
+        /// <param name="playableArea"></param>
+        public SessionSettings(string ambientName, (int x, int y, int size) playableArea)
         {
             GlobalAmbientName = ambientName;
 
-            int margin = (mapSize - playableSize) / 2;
-            PlayableArea = new int[] { margin, margin, playableSize + margin, playableSize + margin };
+            PlayableArea = new int[] { playableArea.x, playableArea.y, playableArea.x + playableArea.size, playableArea.y + playableArea.size };
         }
 
         /// <summary>
@@ -28,14 +26,20 @@ namespace Anno.FileDBModels.Anno1800.Gamedata.Models.Shared
         /// </summary>
         /// <param name="ambientName"></param>
         /// <param name="islandSize"></param>
-        /// <param name="playableSize"></param>
         /// <param name="vegetationSetName"></param>
-        public SessionSettings(string ambientName, int islandSize, int playableSize, string vegetationSetName)
+        /// <param name="playableArea"></param>
+        public SessionSettings(string ambientName, int islandSize, string vegetationSetName, (int x, int y, int size)? playableArea = null)
         {
             GlobalAmbientName = ambientName;
 
-            int margin = (islandSize - playableSize) / 2;
-            PlayableArea = new int[] { margin, margin, playableSize + margin, playableSize + margin };
+            if(playableArea is not null)
+            {
+                PlayableArea = new int[] { playableArea.Value.x, playableArea.Value.y, playableArea.Value.x + playableArea.Value.size, playableArea.Value.y + playableArea.Value.size };
+            }
+            else
+            {
+                PlayableArea = new int[] { 0, 0, islandSize, islandSize };
+            }
 
             VegetationPropSetName = vegetationSetName;
         }

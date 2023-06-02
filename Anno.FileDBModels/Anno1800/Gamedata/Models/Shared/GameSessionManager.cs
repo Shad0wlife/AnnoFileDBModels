@@ -10,9 +10,9 @@ namespace Anno.FileDBModels.Anno1800.Gamedata.Models.Shared
         }
 
 
-        private GameSessionManager(int mapSize, int playableSize, string ambientName)
+        private GameSessionManager(int mapSize, (int x, int y, int size) playableArea, string ambientName)
         {
-            SessionSettings = new SessionSettings(ambientName, mapSize, playableSize);
+            SessionSettings = new SessionSettings(ambientName, playableArea);
             SessionRandomManager = new Empty();
             TerrainManager = new TerrainManager(mapSize);
             SessionCameraManager = new SessionCameraManager(true);
@@ -58,7 +58,7 @@ namespace Anno.FileDBModels.Anno1800.Gamedata.Models.Shared
         /// <param name="playableSize"></param>
         /// <param name="ambientName"></param>
         /// <param name="areaManagerData">The raw data byte array that is the data of the first Data item.</param>
-        public GameSessionManager(int mapSize, int playableSize, string ambientName, byte[] areaManagerData) : this(mapSize, playableSize, ambientName)
+        public GameSessionManager(int mapSize, (int x, int y, int size) playableArea, string ambientName, byte[] areaManagerData) : this(mapSize, playableArea, ambientName)
         {
             AreaManagerData = AreaManagerDataHelper.MakeAreaManagerDataMapTupleList(areaManagerData);
         }
@@ -70,7 +70,7 @@ namespace Anno.FileDBModels.Anno1800.Gamedata.Models.Shared
         /// <param name="playableSize"></param>
         /// <param name="ambientName"></param>
         /// <param name="createAreaManagerData">If a default AreaManagerData content for a pool map should be created. Empty AreaManagerData on false (not null).</param>
-        public GameSessionManager(int mapSize, int playableSize, string ambientName,  bool createAreaManagerData) : this(mapSize, playableSize, ambientName)
+        public GameSessionManager(int mapSize, (int x, int y, int size) playableArea, string ambientName,  bool createAreaManagerData) : this(mapSize, playableArea, ambientName)
         {
             if (createAreaManagerData)
                 AreaManagerData = AreaManagerDataHelper.MakeDefaultAreaManagerDataMapTupleList();
