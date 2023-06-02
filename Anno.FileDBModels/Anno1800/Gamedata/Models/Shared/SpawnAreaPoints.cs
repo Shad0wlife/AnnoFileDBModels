@@ -3,6 +3,10 @@
     public static class SpawnAreaPointsHelper
     {
 
+        /// <summary>
+        /// The default tuple index order for the SpawnAreaPoints in Pool maps.
+        /// Caution: Other maps may have a different order and even different Number of SpawnAreaPoints.
+        /// </summary>
         public static byte[] TupleIndexOrder
         {
             get
