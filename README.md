@@ -10,4 +10,4 @@ Currently, the Library only offers support for gamedata Files (so map data from 
 In the future more file types will be supported.
 
 ## Caveats
-This repository currently ships with build 2.3 of the FileDBSerializer with the rewritten Serialization, which is needed to handle complex files like gamedata properly. If you want to use the models in your own code, make sure you use a FileDBSerializer with the rewritten Serialization in your program as well. When in doubt, use the .dll from this repo.
+This repository currently ships with build 2.4.1 of the FileDBSerializer with the rewritten Serialization, which is needed to handle complex files like gamedata properly. If you want to use the models in your own code, make sure you use a FileDBSerializer with the rewritten Serialization in your program as well. When in doubt, use the .dll from this repo.
